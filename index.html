@@ -10,40 +10,49 @@ html,body{width:100%;height:100%;overflow:hidden;background:#111;touch-action:no
 canvas{display:block;width:100%;height:100%}
 
 /* Joystick */
-#joystick-zone{position:fixed;bottom:0;left:0;width:50%;height:45%;z-index:10;display:none}
+#joystick-zone{position:fixed;top:0;left:0;width:100%;height:100%;z-index:5;display:none}
 #joystick-base{position:absolute;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.25);display:none;pointer-events:none}
 #joystick-thumb{position:absolute;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.35);border:2px solid rgba(255,255,255,0.5);display:none;pointer-events:none}
 
 /* HUD */
 #hud{position:fixed;top:0;left:0;right:0;z-index:10;display:none;padding:10px 16px;pointer-events:none}
-#hud-top{display:flex;flex-direction:row;align-items:center;gap:12px;color:#fff;font-size:15px;font-weight:700;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 -2px 0 #000,0 2px 0 #000,-2px 0 #000,2px 0 #000}
-#hud-stats-box{display:flex;flex-direction:row;align-items:center;gap:10px;padding:6px 10px;background:rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.35);outline:2px solid #000}
-#hud-kills{color:rgba(255,255,255,0.7);font-size:12px;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 -2px 0 #000,0 2px 0 #000,-2px 0 #000,2px 0 #000}
-#total-xp-display{font-size:22px;font-weight:900;color:#ffcc00;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 -2px 0 #000,0 2px 0 #000,-2px 0 #000,2px 0 #000;letter-spacing:1px}
+#hud-top{display:flex;flex-direction:row;align-items:center;gap:8px;color:#fff;font-size:15px;font-weight:700;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000;transform:translateY(5px)}
+.hud-box{padding:4px 14px;background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.25);border-radius:8px;font-size:13px;height:28px;display:inline-flex;align-items:center;justify-content:center}
+#hud-stats-row{display:flex;flex-direction:row;align-items:center;gap:6px}
+#timer-display{font-size:13px}
+#hud-kills{color:rgba(255,255,255,0.85);font-size:13px;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
+#total-xp-display{font-size:16px;font-weight:900;color:#ffcc00;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000;letter-spacing:1px;padding:4px 20px}
 #pause-btn{position:fixed;top:10px;right:12px;z-index:20;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.3);color:#fff;font-size:20px;display:none;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
 #pause-btn:active{background:rgba(255,255,255,0.2)}
-#pause-overlay{position:fixed;inset:0;z-index:90;display:none;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;flex-direction:column}
-#pause-icon{font-size:80px;color:rgba(255,255,255,0.8);text-shadow:0 0 30px rgba(255,255,255,0.3)}
-#pause-label{color:rgba(255,255,255,0.6);font-size:18px;margin-top:12px;font-weight:700;letter-spacing:2px}
+#pause-overlay{position:fixed;inset:0;z-index:90;display:none;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;flex-direction:column}
+#pause-dialog{background:linear-gradient(180deg,#1a0f2e 0%,#2d1b4e 50%,#1a0f2e 100%);border:2px solid #5a4a7a;outline:1px solid #000;border-radius:20px;padding:32px 40px;min-width:300px;display:flex;flex-direction:column;align-items:center;gap:16px;pointer-events:auto;box-shadow:0 8px 40px rgba(0,0,0,0.6)}
+#pause-dialog h3{color:#ffcc00;font-size:24px;font-weight:900;margin:0 0 4px 0;letter-spacing:2px;text-shadow:0 0 20px rgba(255,204,0,0.4),-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
+.pause-btn-action{width:100%;padding:14px 0;font-size:17px;font-weight:700;color:#fff;border:none;border-radius:30px;cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent;transition:transform 0.15s,box-shadow 0.15s;letter-spacing:1px}
+.pause-btn-action:hover,.pause-btn-action:active{transform:scale(1.04)}
+#btn-resume{background:linear-gradient(135deg,#3498db,#2980b9);box-shadow:0 4px 16px rgba(52,152,219,0.4)}
+#btn-sound{background:linear-gradient(135deg,#6c5b7b,#4a3f5c);box-shadow:0 4px 16px rgba(108,91,123,0.4)}
+#btn-title{background:linear-gradient(135deg,#e8433e,#c0392b);box-shadow:0 4px 16px rgba(232,67,62,0.4)}
 
 /* XP Bar (DOM) - Pixel style */
 #xp-bar-container{position:fixed;top:57px;left:16px;right:16px;z-index:10;display:none;pointer-events:none;flex-direction:row;align-items:center;gap:6px}
-#xp-lv-label{color:#fff;font-size:13px;font-weight:900;white-space:nowrap;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 -2px 0 #000,0 2px 0 #000,-2px 0 #000,2px 0 #000}
-#xp-bar-outer{flex:1;height:14px;background:#1a1a2e;border:2px solid #555;outline:2px solid #000;overflow:hidden;position:relative}
-#xp-bar-inner{height:100%;background:#2980b9;transition:width 0.15s;width:0%}
-#xp-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:10px;font-weight:700;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 -2px 0 #000,0 2px 0 #000,-2px 0 #000,2px 0 #000}
+#xp-lv-label{color:#fff;font-size:13px;font-weight:900;white-space:nowrap;min-width:32px;text-align:center;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
+#xp-bar-outer{flex:1;height:14px;background:#1a1a2e;border:2px solid #555;outline:2px solid #000;border-radius:7px;overflow:hidden;position:relative}
+#xp-bar-inner{height:100%;background:linear-gradient(to right,#1a5a8a,#2980b9,#3daee0);border-radius:5px;transition:width 0.15s;width:0%}
+#xp-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:10px;font-weight:700;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
 
 /* HP Bar - Pixel style, below XP */
-#hp-bar-container{position:fixed;top:79px;left:16px;right:16px;z-index:10;display:none;flex-direction:row;align-items:center;gap:6px}
-#hp-bar-outer{flex:1;height:14px;background:#1a1a2e;border:2px solid #555;outline:2px solid #000;overflow:hidden;position:relative}
-#hp-bar-inner{height:100%;background:#5cb800;transition:width 0.15s;width:100%}
-#hp-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:10px;font-weight:700;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 -2px 0 #000,0 2px 0 #000,-2px 0 #000,2px 0 #000}
-#hp-heart{color:#66ff00;font-size:16px;line-height:1}
+#hp-bar-container{position:fixed;top:79px;left:16px;right:16px;z-index:10;display:none;flex-direction:row;align-items:center;gap:6px;pointer-events:none}
+#hp-bar-outer{flex:1;height:14px;background:#1a1a2e;border:2px solid #555;outline:2px solid #000;border-radius:7px;overflow:hidden;position:relative}
+#hp-bar-inner{height:100%;background:linear-gradient(to right,#3a8000,#5cb800,#78e000);border-radius:5px;transition:width 0.15s;width:100%}
+#hp-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:10px;font-weight:700;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
+#hp-heart{color:#66ff00;font-size:16px;line-height:1;min-width:32px;text-align:center;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
 
 /* Weapon slots - below HP bar */
-#weapon-slots{position:fixed;bottom:16px;left:20px;right:20px;z-index:10;display:none;gap:6px;flex-direction:row;justify-content:flex-start}
-#weapon-slots .slot{width:38px;height:38px;background:rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+#weapon-slots{position:fixed;bottom:16px;left:20px;right:20px;z-index:10;display:none;gap:5px;flex-direction:row;justify-content:flex-start}
+#weapon-slots .slot{width:48px;height:56px;background:rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.3);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:27px;outline:1px solid #000;gap:0}
 #weapon-slots .slot.active{border-color:#ffcc00;background:rgba(40,30,60,0.8)}
+#weapon-slots .slot .slot-lv{font-size:9px;font-weight:900;font-family:'Arial Black',sans-serif;color:#ffcc00;line-height:1;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
+#weapon-slots .slot .slot-lv.passive{color:#88aaff}
 
 /* Level Up Screen */
 #levelup-screen{position:fixed;inset:0;z-index:100;display:none;background:rgba(0,0,0,0.75);flex-direction:column;align-items:center;justify-content:center;padding:20px}
@@ -92,11 +101,11 @@ canvas{display:block;width:100%;height:100%}
 <!-- HUD -->
 <div id="hud">
   <div id="hud-top">
-    <div id="hud-stats-box">
-      <span id="timer-display">10:00</span>
-      <span id="hud-kills">&#x1F480; <span id="kills-display">0</span></span>
+    <div id="hud-stats-row">
+      <span class="hud-box" id="timer-display">10:00</span>
+      <span class="hud-box" id="hud-kills">&#x1F480; <span id="kills-display">0</span></span>
     </div>
-    <span id="total-xp-display">SCORE 0</span>
+    <span class="hud-box" id="total-xp-display">SCORE 0</span>
   </div>
 </div>
 
@@ -105,8 +114,12 @@ canvas{display:block;width:100%;height:100%}
 
 <!-- Pause Overlay -->
 <div id="pause-overlay">
-  <div id="pause-icon">⏸</div>
-  <div id="pause-label">PAUSED</div>
+  <div id="pause-dialog">
+    <h3>オプション</h3>
+    <button class="pause-btn-action" id="btn-resume">ゲームを再開</button>
+    <button class="pause-btn-action" id="btn-sound">🔊 サウンド: ON</button>
+    <button class="pause-btn-action" id="btn-title">タイトルに戻る</button>
+  </div>
 </div>
 
 <!-- XP Bar -->
@@ -118,7 +131,7 @@ canvas{display:block;width:100%;height:100%}
 <!-- HP Bar -->
 <div id="hp-bar-container">
   <span id="hp-heart">&#x1F49A;</span>
-  <div id="hp-bar-outer"><div id="hp-bar-inner"></div><span id="hp-text">999/999</span></div>
+  <div id="hp-bar-outer"><div id="hp-bar-inner"></div><span id="hp-text">100/100</span></div>
 </div>
 
 <!-- Weapon Slots -->
@@ -146,14 +159,14 @@ canvas{display:block;width:100%;height:100%}
     <img src="assets/player2.png" alt="">
     <img src="assets/boss_slime.png" alt="">
   </div>
-  <button id="start-btn">&#x2694;&#xFE0F; START &#x2694;&#xFE0F;</button>
+  <button id="start-btn">&#x2694;&#xFE0F; スタート &#x2694;&#xFE0F;</button>
 </div>
 
 <!-- Result -->
 <div id="result-screen">
   <h2 id="result-title"></h2>
   <div class="result-stats" id="result-stats"></div>
-  <button id="retry-btn">RETRY</button>
+  <button id="retry-btn">リベンジ</button>
 </div>
 
 <script>
@@ -162,7 +175,7 @@ const CFG = {
   MAP_W: 4000, MAP_H: 4000,
   VIEW_W: 480, VIEW_H: 854,
   GAME_TIME: 600,
-  PLAYER_HP: 999,
+  PLAYER_HP: 100,
   PLAYER_SPEED: 210,
   PLAYER_SIZE: 24,
   SPRITE_SCALE: 2.5,
@@ -183,7 +196,8 @@ const ASSET_LIST = [
   ['golem', 'assets/golem.png'],
   ['boss', 'assets/boss_slime.png'],
   ['sword', 'assets/sword.png'],
-  ['player_front', 'assets/player2.png']
+  ['player_front', 'assets/player2.png'],
+  ['crystal', 'assets/crystal.png']
 ];
 
 function loadAssets() {
@@ -531,7 +545,9 @@ function updateEnemies(dt) {
     e.y = clamp(e.y, 10, CFG.MAP_H - 10);
     e.flashTimer = Math.max(0, e.flashTimer - dt);
 
-    if (dist(e.x, e.y, player.x, player.y) < e.size + CFG.PLAYER_SIZE) {
+    const hitDist = dist(e.x, e.y, player.x, player.y);
+    const hitRange = e.size + CFG.PLAYER_SIZE + 12;
+    if (hitDist < hitRange) {
       touching = true;
       if (e.atk > highestDmg) highestDmg = e.atk;
     }
@@ -554,9 +570,9 @@ function damageEnemy(e, dmg, fx, fy) {
   damageNums.push({ x: e.x + rand(-10, 10), y: e.y - e.size, val: Math.round(dmg), color: '#ffff44', timer: 0.6 });
   if (!e.knockbackResist) {
     const ka = angle(fx, fy, e.x, e.y);
-    e.kbx = Math.cos(ka) * 80;
-    e.kby = Math.sin(ka) * 80;
-    e.jumpVel = -120;
+    e.kbx = Math.cos(ka) * 160;
+    e.kby = Math.sin(ka) * 160;
+    e.jumpVel = -200;
   }
   if (e.hp <= 0) {
     e.active = false;
@@ -565,8 +581,9 @@ function damageEnemy(e, dmg, fx, fy) {
     for (let i = 0; i < Math.ceil(e.xpDrop * cloverBonus); i++) {
       xpGems.push({ x: e.x + rand(-15, 15), y: e.y + rand(-15, 15), val: 1, timer: 30, size: 4 + (e.boss ? 3 : 0) });
     }
-    for (let i = 0; i < 6; i++) {
-      effects.push({ type: 'particle', x: e.x, y: e.y, vx: rand(-60, 60), vy: rand(-60, 60), timer: 0.4, maxTime: 0.4, color: '#fff', size: 3 });
+    for (let i = 0; i < 12; i++) {
+      const c = pick(['#cc44ff','#aa22dd','#dd66ff','#9933cc']);
+      effects.push({ type: 'particle', x: e.x, y: e.y, vx: rand(-80, 80), vy: rand(-80, 80), timer: 0.5, maxTime: 0.5, color: c, size: 3 + rand(0, 2) });
     }
   }
 }
@@ -585,7 +602,10 @@ function updateXPGems(dt) {
       g.x += Math.cos(a) * spd * dt;
       g.y += Math.sin(a) * spd * dt;
     }
-    if (d < 15) {
+    const dyGem = g.y - player.y;
+    const dxGem = Math.abs(g.x - player.x);
+    const pickOk = (dyGem > 0) ? (dyGem < 80 && dxGem < 50) : (d < 30);
+    if (d < 30 || pickOk) {
       player.xp += g.val;
       totalXP += g.val;
       xpGems.splice(i, 1);
@@ -923,17 +943,46 @@ function setupInput() {
 
   const pauseBtn = document.getElementById('pause-btn');
   const pauseOverlay = document.getElementById('pause-overlay');
-  function togglePause() {
-    if (state !== 'playing') return;
-    paused = !paused;
-    pauseOverlay.style.display = paused ? 'flex' : 'none';
-    pauseBtn.textContent = paused ? '▶' : '⏸';
-    if (!paused) lastTime = performance.now();
+  let soundOn = true;
+
+  function openPause() {
+    if (state !== 'playing' || paused) return;
+    paused = true;
+    pauseOverlay.style.display = 'flex';
+    pauseBtn.textContent = '▶';
   }
-  pauseBtn.addEventListener('click', togglePause);
-  pauseBtn.addEventListener('touchend', (e) => { e.preventDefault(); togglePause(); });
-  pauseOverlay.addEventListener('click', togglePause);
-  pauseOverlay.addEventListener('touchend', (e) => { e.preventDefault(); togglePause(); });
+  function closePause() {
+    paused = false;
+    pauseOverlay.style.display = 'none';
+    pauseBtn.textContent = '⏸';
+    lastTime = performance.now();
+  }
+
+  pauseBtn.addEventListener('click', () => { if (paused) closePause(); else openPause(); });
+  pauseBtn.addEventListener('touchend', (e) => { e.preventDefault(); if (paused) closePause(); else openPause(); });
+
+  document.getElementById('btn-resume').addEventListener('click', closePause);
+  document.getElementById('btn-resume').addEventListener('touchend', (e) => { e.preventDefault(); closePause(); });
+
+  pauseOverlay.addEventListener('click', (e) => { if (e.target === pauseOverlay) closePause(); });
+  pauseOverlay.addEventListener('touchend', (e) => { if (e.target === pauseOverlay) { e.preventDefault(); closePause(); } });
+
+  document.getElementById('btn-sound').addEventListener('click', () => {
+    soundOn = !soundOn;
+    document.getElementById('btn-sound').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
+  });
+
+  document.getElementById('btn-title').addEventListener('click', () => {
+    closePause();
+    state = 'title';
+    document.getElementById('hud').style.display = 'none';
+    document.getElementById('xp-bar-container').style.display = 'none';
+    document.getElementById('joystick-zone').style.display = 'none';
+    document.getElementById('hp-bar-container').style.display = 'none';
+    document.getElementById('weapon-slots').style.display = 'none';
+    document.getElementById('pause-btn').style.display = 'none';
+    document.getElementById('title-screen').style.display = 'flex';
+  });
 }
 
 // ========== PLAYER UPDATE ==========
@@ -981,10 +1030,13 @@ function render() {
 
   drawMap();
   drawXPGems();
-  drawEffectsWorld();
+  drawEffectsBehind();
   drawEnemies();
   drawProjectiles();
+  const swordBehind = player.facing.y < -0.1;
+  if (swordBehind) drawEffectsFront();
   drawPlayer();
+  if (!swordBehind) drawEffectsFront();
   drawDamageNums();
 
   ctx.setTransform(gameScale, 0, 0, gameScale, gameOffX, gameOffY);
@@ -1033,7 +1085,7 @@ function drawPlayer() {
   ctx.shadowBlur = 12;
   ctx.fillStyle = 'rgba(0,0,0,0.2)';
   ctx.beginPath();
-  ctx.ellipse(px, py + PH * 0.35, PW * 0.25, 7, 0, 0, Math.PI * 2);
+  ctx.ellipse(px, py + PH * 0.35 + 5, PW * 0.25, 7, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 
@@ -1071,7 +1123,11 @@ function drawEnemies() {
     ctx.shadowBlur = 10;
     ctx.fillStyle = 'rgba(0,0,0,0.18)';
     ctx.beginPath();
-    ctx.ellipse(e.x, e.y + e.h * 0.35, e.w * 0.22, Math.max(4, e.h * 0.06), 0, 0, Math.PI * 2);
+    let shYOff = e.h * 0.35, shRx = e.w * 0.22, shRy = Math.max(4, e.h * 0.06);
+    if (e.type === 'slime_green') shYOff -= 5;
+    if (e.type === 'slime_blue') { shRx *= 1.5; shRy *= 1.5; }
+    if (e.type === 'bat') shYOff += 20;
+    ctx.ellipse(e.x, e.y + shYOff, shRx, shRy, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
@@ -1090,27 +1146,33 @@ function drawEnemies() {
 
     if (e.boss || e.hp < e.maxHp) {
       const bw = e.boss ? 70 : 40;
+      const bx = e.x - bw / 2, by = e.y + jy - e.h / 2 - 10;
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(bx - 1, by - 1, bw + 2, 8);
       ctx.fillStyle = 'rgba(0,0,0,0.6)';
-      ctx.fillRect(e.x - bw / 2, e.y + jy - e.h / 2 - 10, bw, 6);
+      ctx.fillRect(bx, by, bw, 6);
       ctx.fillStyle = e.boss ? '#ff4444' : '#44ff44';
-      ctx.fillRect(e.x - bw / 2, e.y + jy - e.h / 2 - 10, bw * (e.hp / e.maxHp), 6);
+      ctx.fillRect(bx, by, bw * (e.hp / e.maxHp), 6);
     }
   }
 }
 
 function drawXPGems() {
-  ctx.shadowColor = '#44ff88';
-  ctx.shadowBlur = 6;
   for (const g of xpGems) {
     if (g.x < camera.x - 10 || g.x > camera.x + CFG.VIEW_W + 10 || g.y < camera.y - 10 || g.y > camera.y + CFG.VIEW_H + 10) continue;
-    ctx.fillStyle = '#44ff88';
-    ctx.save();
-    ctx.translate(g.x, g.y);
-    ctx.rotate(Math.PI / 4);
-    ctx.fillRect(-g.size / 2, -g.size / 2, g.size, g.size);
-    ctx.restore();
+    if (IMG.crystal) {
+      const cs = g.size * 3;
+      ctx.drawImage(IMG.crystal, g.x - cs / 2, g.y - cs / 2, cs, cs);
+    } else {
+      ctx.fillStyle = '#44ff88';
+      ctx.save();
+      ctx.translate(g.x, g.y);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillRect(-g.size / 2, -g.size / 2, g.size, g.size);
+      ctx.restore();
+    }
   }
-  ctx.shadowBlur = 0;
 }
 
 function drawProjectiles() {
@@ -1127,40 +1189,10 @@ function drawProjectiles() {
   }
 }
 
-function drawEffectsWorld() {
+function drawEffectsBehind() {
   for (const ef of effects) {
+    if (ef.type === 'sword_swing') continue;
     const alpha = Math.max(0, ef.timer / ef.maxTime);
-
-    if (ef.type === 'sword_swing') {
-      const progress = 1 - ef.timer / ef.maxTime;
-      const swingAngle = ef.dir - ef.arc + progress * ef.arc * 2;
-      ctx.save();
-      ctx.translate(ef.x, ef.y);
-
-      // Faint arc trail
-      ctx.fillStyle = `rgba(255,255,255,${alpha * 0.15})`;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.arc(0, 0, ef.range, ef.dir - ef.arc, swingAngle);
-      ctx.closePath();
-      ctx.fill();
-
-      // Draw sword image
-      if (IMG.sword) {
-        ctx.save();
-        ctx.rotate(swingAngle);
-        ctx.drawImage(IMG.sword, 10, -20, ef.range * 0.85, 40);
-        ctx.restore();
-      } else {
-        ctx.strokeStyle = `rgba(200,230,255,${alpha * 0.8})`;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(Math.cos(swingAngle) * ef.range, Math.sin(swingAngle) * ef.range);
-        ctx.stroke();
-      }
-      ctx.restore();
-    }
 
     if (ef.type === 'lightning') {
       ctx.save();
@@ -1220,13 +1252,46 @@ function drawEffectsWorld() {
   }
 }
 
+function drawEffectsFront() {
+  for (const ef of effects) {
+    if (ef.type !== 'sword_swing') continue;
+    const alpha = Math.max(0, ef.timer / ef.maxTime);
+    const progress = 1 - ef.timer / ef.maxTime;
+    const swingAngle = ef.dir - ef.arc + progress * ef.arc * 2;
+    ctx.save();
+    ctx.translate(ef.x, ef.y);
+
+    ctx.fillStyle = `rgba(255,255,255,${alpha * 0.15})`;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.arc(0, 0, ef.range, ef.dir - ef.arc, swingAngle);
+    ctx.closePath();
+    ctx.fill();
+
+    if (IMG.sword) {
+      ctx.save();
+      ctx.rotate(swingAngle);
+      ctx.drawImage(IMG.sword, 10, -20, ef.range * 0.85, 40);
+      ctx.restore();
+    } else {
+      ctx.strokeStyle = `rgba(200,230,255,${alpha * 0.8})`;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.cos(swingAngle) * ef.range, Math.sin(swingAngle) * ef.range);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
 function drawDamageNums() {
   for (const d of damageNums) {
     const alpha = Math.max(0, d.timer / 0.6);
     ctx.globalAlpha = alpha;
     ctx.font = 'bold 16px sans-serif';
     ctx.textAlign = 'center';
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2;
     ctx.strokeStyle = '#000';
     ctx.strokeText(d.val, d.x, d.y);
     ctx.fillStyle = d.color;
@@ -1294,9 +1359,9 @@ function updateHUD() {
 
   const hpRatio = player.hp / player.maxHp;
   document.getElementById('hp-bar-inner').style.background =
-    hpRatio > 0.5 ? '#5cb800' :
-    hpRatio > 0.25 ? '#dda000' :
-    '#dd3300';
+    hpRatio > 0.5 ? 'linear-gradient(to right,#3a8000,#5cb800,#78e000)' :
+    hpRatio > 0.25 ? 'linear-gradient(to right,#aa7a00,#dda000,#eebb22)' :
+    'linear-gradient(to right,#aa2200,#dd3300,#ee5522)';
 
   // XP bar
   document.getElementById('xp-bar-inner').style.width = `${(player.xp / player.xpToNext) * 100}%`;
@@ -1308,11 +1373,11 @@ function updateHUD() {
   if (hasItems) {
     ws.style.display = 'flex';
     let html = player.weapons.map(w =>
-      `<div class="slot active" title="${w.name} Lv.${w.level}">${w.icon}<sub style="font-size:9px;color:#ffcc00">${w.level}</sub></div>`
+      `<div class="slot active" title="${w.name} Lv.${w.level}">${w.icon}<span class="slot-lv">Lv.${w.level}</span></div>`
     ).join('');
     for (const pd of PASSIVE_DEFS) {
       const lv = player.passives[pd.id];
-      if (lv) html += `<div class="slot" title="${pd.name} Lv.${lv}" style="border-color:#88aaff">${pd.icon}<sub style="font-size:9px;color:#88aaff">${lv}</sub></div>`;
+      if (lv) html += `<div class="slot" title="${pd.name} Lv.${lv}" style="border-color:#88aaff">${pd.icon}<span class="slot-lv passive">Lv.${lv}</span></div>`;
     }
     ws.innerHTML = html;
   }

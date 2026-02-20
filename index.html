@@ -16,27 +16,32 @@ canvas{display:block;width:100%;height:100%}
 
 /* HUD */
 #hud{position:fixed;top:0;left:0;right:0;z-index:10;display:none;padding:10px 16px;pointer-events:none}
-#hud-top{display:flex;justify-content:space-between;align-items:center;color:#fff;font-size:15px;font-weight:700;text-shadow:0 2px 6px rgba(0,0,0,0.7)}
-#hud-center{text-align:center}
-#total-xp-display{font-size:22px;font-weight:900;color:#ffcc00;text-shadow:0 0 12px rgba(255,204,0,0.5),0 2px 4px rgba(0,0,0,0.6);letter-spacing:1px}
-#hud-kills{color:rgba(255,255,255,0.7);font-size:12px;margin-top:1px;text-shadow:0 2px 6px rgba(0,0,0,0.7)}
+#hud-top{display:flex;flex-direction:row;align-items:center;gap:12px;color:#fff;font-size:15px;font-weight:700;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 -2px 0 #000,0 2px 0 #000,-2px 0 #000,2px 0 #000}
+#hud-stats-box{display:flex;flex-direction:row;align-items:center;gap:10px;padding:6px 10px;background:rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.35);outline:2px solid #000}
+#hud-kills{color:rgba(255,255,255,0.7);font-size:12px;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 -2px 0 #000,0 2px 0 #000,-2px 0 #000,2px 0 #000}
+#total-xp-display{font-size:22px;font-weight:900;color:#ffcc00;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 -2px 0 #000,0 2px 0 #000,-2px 0 #000,2px 0 #000;letter-spacing:1px}
+#pause-btn{position:fixed;top:10px;right:12px;z-index:20;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.3);color:#fff;font-size:20px;display:none;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#pause-btn:active{background:rgba(255,255,255,0.2)}
+#pause-overlay{position:fixed;inset:0;z-index:90;display:none;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;flex-direction:column}
+#pause-icon{font-size:80px;color:rgba(255,255,255,0.8);text-shadow:0 0 30px rgba(255,255,255,0.3)}
+#pause-label{color:rgba(255,255,255,0.6);font-size:18px;margin-top:12px;font-weight:700;letter-spacing:2px}
 
-/* XP Bar (DOM) */
-#xp-bar-container{position:fixed;top:42px;left:16px;right:16px;z-index:10;display:none;pointer-events:none}
-#xp-bar-outer{width:100%;height:16px;background:#1a1a2e;border:2px solid #000;border-radius:10px;overflow:hidden;position:relative}
-#xp-bar-inner{height:100%;background:linear-gradient(to right,#2980b9,#44ccff);border-radius:8px;transition:width 0.15s;width:0%}
-#xp-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:10px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,0.8)}
+/* XP Bar (DOM) - Pixel style */
+#xp-bar-container{position:fixed;top:57px;left:16px;right:16px;z-index:10;display:none;pointer-events:none;flex-direction:row;align-items:center;gap:6px}
+#xp-lv-label{color:#fff;font-size:13px;font-weight:900;white-space:nowrap;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 -2px 0 #000,0 2px 0 #000,-2px 0 #000,2px 0 #000}
+#xp-bar-outer{flex:1;height:14px;background:#1a1a2e;border:2px solid #555;outline:2px solid #000;overflow:hidden;position:relative}
+#xp-bar-inner{height:100%;background:#2980b9;transition:width 0.15s;width:0%}
+#xp-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:10px;font-weight:700;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 -2px 0 #000,0 2px 0 #000,-2px 0 #000,2px 0 #000}
 
-/* HP Bar */
-#hp-bar-container{position:fixed;bottom:170px;left:20px;right:20px;z-index:10;display:none}
-#hp-bar-outer{width:100%;height:22px;background:#1a1a2e;border:3px solid #000;border-radius:12px;overflow:hidden;position:relative}
-#hp-bar-inner{height:100%;background:linear-gradient(to right,#4f9900,#84ff00);border-radius:10px;transition:width 0.15s;width:100%}
-#hp-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:12px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,0.8)}
-#hp-heart{color:#66ff00;font-size:20px;margin-right:6px}
-#hp-row{display:flex;align-items:center}
+/* HP Bar - Pixel style, below XP */
+#hp-bar-container{position:fixed;top:79px;left:16px;right:16px;z-index:10;display:none;flex-direction:row;align-items:center;gap:6px}
+#hp-bar-outer{flex:1;height:14px;background:#1a1a2e;border:2px solid #555;outline:2px solid #000;overflow:hidden;position:relative}
+#hp-bar-inner{height:100%;background:#5cb800;transition:width 0.15s;width:100%}
+#hp-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:10px;font-weight:700;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 -2px 0 #000,0 2px 0 #000,-2px 0 #000,2px 0 #000}
+#hp-heart{color:#66ff00;font-size:16px;line-height:1}
 
 /* Weapon slots - below HP bar */
-#weapon-slots{position:fixed;bottom:138px;left:20px;right:20px;z-index:10;display:none;gap:6px;flex-direction:row;justify-content:flex-start}
+#weapon-slots{position:fixed;bottom:16px;left:20px;right:20px;z-index:10;display:none;gap:6px;flex-direction:row;justify-content:flex-start}
 #weapon-slots .slot{width:38px;height:38px;background:rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.3);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
 #weapon-slots .slot.active{border-color:#ffcc00;background:rgba(40,30,60,0.8)}
 
@@ -87,23 +92,33 @@ canvas{display:block;width:100%;height:100%}
 <!-- HUD -->
 <div id="hud">
   <div id="hud-top">
-    <div><span id="timer-display">10:00</span><br><span id="hud-kills">&#x1F480; <span id="kills-display">0</span></span></div>
-    <div id="hud-center"><span id="total-xp-display">EXP 0</span></div>
-    <div>Lv.<span id="level-display">1</span></div>
+    <div id="hud-stats-box">
+      <span id="timer-display">10:00</span>
+      <span id="hud-kills">&#x1F480; <span id="kills-display">0</span></span>
+    </div>
+    <span id="total-xp-display">SCORE 0</span>
   </div>
+</div>
+
+<!-- Pause Button -->
+<div id="pause-btn">⏸</div>
+
+<!-- Pause Overlay -->
+<div id="pause-overlay">
+  <div id="pause-icon">⏸</div>
+  <div id="pause-label">PAUSED</div>
 </div>
 
 <!-- XP Bar -->
 <div id="xp-bar-container">
+  <span id="xp-lv-label">Lv.1</span>
   <div id="xp-bar-outer"><div id="xp-bar-inner"></div><span id="xp-label">EXP</span></div>
 </div>
 
 <!-- HP Bar -->
 <div id="hp-bar-container">
-  <div id="hp-row">
-    <span id="hp-heart">&#x1F49A;</span>
-    <div id="hp-bar-outer"><div id="hp-bar-inner"></div><span id="hp-text">999/999</span></div>
-  </div>
+  <span id="hp-heart">&#x1F49A;</span>
+  <div id="hp-bar-outer"><div id="hp-bar-inner"></div><span id="hp-text">999/999</span></div>
 </div>
 
 <!-- Weapon Slots -->
@@ -148,7 +163,7 @@ const CFG = {
   VIEW_W: 480, VIEW_H: 854,
   GAME_TIME: 600,
   PLAYER_HP: 999,
-  PLAYER_SPEED: 140,
+  PLAYER_SPEED: 210,
   PLAYER_SIZE: 24,
   SPRITE_SCALE: 2.5,
   XP_BASE: 12, XP_PER_LV: 6,
@@ -208,6 +223,7 @@ resize();
 
 // ========== GAME STATE ==========
 let state = 'loading';
+let paused = false;
 let gameTime = 0;
 let kills = 0;
 let totalXP = 0;
@@ -476,7 +492,8 @@ function spawnEnemy(type) {
     boss: def.boss || false, final: def.final || false,
     knockbackResist: def.knockbackResist || def.boss || false,
     zigzag: def.zigzag || false, zigTimer: 0, zigDir: 1,
-    flashTimer: 0, kbx: 0, kby: 0
+    flashTimer: 0, kbx: 0, kby: 0,
+    jumpH: 0, jumpVel: 0
   });
 }
 
@@ -503,6 +520,11 @@ function updateEnemies(dt) {
       e.kbx *= 0.85; e.kby *= 0.85;
       if (Math.abs(e.kbx) < 0.5) e.kbx = 0;
       if (Math.abs(e.kby) < 0.5) e.kby = 0;
+    }
+    if (e.jumpVel || e.jumpH < 0) {
+      e.jumpVel += 500 * dt;
+      e.jumpH += e.jumpVel * dt;
+      if (e.jumpH >= 0) { e.jumpH = 0; e.jumpVel = 0; }
     }
     e.x += mx; e.y += my;
     e.x = clamp(e.x, 10, CFG.MAP_W - 10);
@@ -532,8 +554,9 @@ function damageEnemy(e, dmg, fx, fy) {
   damageNums.push({ x: e.x + rand(-10, 10), y: e.y - e.size, val: Math.round(dmg), color: '#ffff44', timer: 0.6 });
   if (!e.knockbackResist) {
     const ka = angle(fx, fy, e.x, e.y);
-    e.kbx = Math.cos(ka) * 40;
-    e.kby = Math.sin(ka) * 40;
+    e.kbx = Math.cos(ka) * 80;
+    e.kby = Math.sin(ka) * 80;
+    e.jumpVel = -120;
   }
   if (e.hp <= 0) {
     e.active = false;
@@ -724,9 +747,12 @@ function startGame() {
   document.getElementById('title-screen').style.display = 'none';
   document.getElementById('result-screen').style.display = 'none';
   document.getElementById('hud').style.display = 'block';
-  document.getElementById('xp-bar-container').style.display = 'block';
+  document.getElementById('xp-bar-container').style.display = 'flex';
   document.getElementById('joystick-zone').style.display = 'block';
-  document.getElementById('hp-bar-container').style.display = 'block';
+  document.getElementById('pause-btn').style.display = 'flex';
+  paused = false;
+  document.getElementById('pause-overlay').style.display = 'none';
+  document.getElementById('hp-bar-container').style.display = 'flex';
 
   gameTime = 0; kills = 0; totalXP = 0; levelupPending = false;
   shakeTimer = 0; spawnTimer = 0; bossSpawned = {}; statMul = 1;
@@ -762,6 +788,9 @@ function showResult(cleared) {
   document.getElementById('joystick-zone').style.display = 'none';
   document.getElementById('hp-bar-container').style.display = 'none';
   document.getElementById('weapon-slots').style.display = 'none';
+  document.getElementById('pause-btn').style.display = 'none';
+  document.getElementById('pause-overlay').style.display = 'none';
+  paused = false;
   const rs = document.getElementById('result-screen');
   rs.className = cleared ? 'clear' : 'gameover';
   rs.style.display = 'flex';
@@ -891,6 +920,20 @@ function setupInput() {
 
   document.getElementById('start-btn').onclick = startGame;
   document.getElementById('retry-btn').onclick = startGame;
+
+  const pauseBtn = document.getElementById('pause-btn');
+  const pauseOverlay = document.getElementById('pause-overlay');
+  function togglePause() {
+    if (state !== 'playing') return;
+    paused = !paused;
+    pauseOverlay.style.display = paused ? 'flex' : 'none';
+    pauseBtn.textContent = paused ? '▶' : '⏸';
+    if (!paused) lastTime = performance.now();
+  }
+  pauseBtn.addEventListener('click', togglePause);
+  pauseBtn.addEventListener('touchend', (e) => { e.preventDefault(); togglePause(); });
+  pauseOverlay.addEventListener('click', togglePause);
+  pauseOverlay.addEventListener('touchend', (e) => { e.preventDefault(); togglePause(); });
 }
 
 // ========== PLAYER UPDATE ==========
@@ -984,6 +1027,16 @@ function drawMap() {
 
 function drawPlayer() {
   const px = player.x, py = player.y;
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.35)';
+  ctx.shadowBlur = 12;
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.beginPath();
+  ctx.ellipse(px, py + PH * 0.35, PW * 0.25, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
   ctx.save();
   if (player.invTimer > 0 && Math.floor(player.invTimer * 20) % 2 === 0) { ctx.globalAlpha = 0.4; }
 
@@ -1011,25 +1064,36 @@ function drawEnemies() {
     if (!e.active) continue;
     if (e.x < camera.x - 200 || e.x > camera.x + CFG.VIEW_W + 200 || e.y < camera.y - 200 || e.y > camera.y + CFG.VIEW_H + 200) continue;
 
+    const jy = e.jumpH || 0;
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.beginPath();
+    ctx.ellipse(e.x, e.y + e.h * 0.35, e.w * 0.22, Math.max(4, e.h * 0.06), 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
     ctx.save();
     if (e.flashTimer > 0) { ctx.globalAlpha = 0.6; }
 
     const def = ENEMY_DEFS[e.type];
     const img = IMG[def.img];
     if (img) {
-      ctx.drawImage(img, e.x - e.w / 2, e.y - e.h / 2, e.w, e.h);
+      ctx.drawImage(img, e.x - e.w / 2, e.y + jy - e.h / 2, e.w, e.h);
     } else {
       ctx.fillStyle = '#ff4466';
-      ctx.beginPath(); ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(e.x, e.y + jy, e.size, 0, Math.PI * 2); ctx.fill();
     }
     ctx.restore();
 
     if (e.boss || e.hp < e.maxHp) {
       const bw = e.boss ? 70 : 40;
       ctx.fillStyle = 'rgba(0,0,0,0.6)';
-      ctx.fillRect(e.x - bw / 2, e.y - e.h / 2 - 10, bw, 6);
+      ctx.fillRect(e.x - bw / 2, e.y + jy - e.h / 2 - 10, bw, 6);
       ctx.fillStyle = e.boss ? '#ff4444' : '#44ff44';
-      ctx.fillRect(e.x - bw / 2, e.y - e.h / 2 - 10, bw * (e.hp / e.maxHp), 6);
+      ctx.fillRect(e.x - bw / 2, e.y + jy - e.h / 2 - 10, bw * (e.hp / e.maxHp), 6);
     }
   }
 }
@@ -1160,32 +1224,58 @@ function drawDamageNums() {
   for (const d of damageNums) {
     const alpha = Math.max(0, d.timer / 0.6);
     ctx.globalAlpha = alpha;
-    ctx.fillStyle = d.color;
     ctx.font = 'bold 16px sans-serif';
     ctx.textAlign = 'center';
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = '#000';
+    ctx.strokeText(d.val, d.x, d.y);
+    ctx.fillStyle = d.color;
     ctx.fillText(d.val, d.x, d.y);
     ctx.globalAlpha = 1;
   }
 }
 
 function drawHUDCanvas() {
-  // Minimap
-  const mmSize = 60;
-  const mmX = CFG.VIEW_W - mmSize - 10;
-  const mmY = CFG.VIEW_H - mmSize - 10;
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.fillRect(mmX, mmY, mmSize, mmSize);
-  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(mmX, mmY, mmSize, mmSize);
+  const mmR = 60;
+  const mmD = mmR * 2;
+  const mmCX = CFG.VIEW_W - mmR - 14;
+  const mmCY = mmR + 39;
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(mmCX, mmCY, mmR, 0, Math.PI * 2);
+  ctx.clip();
+
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(mmCX - mmR, mmCY - mmR, mmD, mmD);
+  ctx.fillStyle = 'rgba(100,80,60,0.35)';
+  ctx.fillRect(mmCX - mmR, mmCY - mmR, mmD, mmD);
+
   ctx.fillStyle = '#44ff44';
-  ctx.fillRect(mmX + (player.x / CFG.MAP_W) * mmSize - 2, mmY + (player.y / CFG.MAP_H) * mmSize - 2, 4, 4);
+  const ppx = mmCX - mmR + (player.x / CFG.MAP_W) * mmD;
+  const ppy = mmCY - mmR + (player.y / CFG.MAP_H) * mmD;
+  ctx.fillRect(ppx - 2, ppy - 2, 5, 5);
+
   for (const e of enemies) {
     if (!e.active) continue;
     ctx.fillStyle = e.boss ? '#ff4444' : '#ff8844';
-    const s = e.boss ? 3 : 1;
-    ctx.fillRect(mmX + (e.x / CFG.MAP_W) * mmSize - s / 2, mmY + (e.y / CFG.MAP_H) * mmSize - s / 2, s, s);
+    const s = e.boss ? 4 : 2;
+    const ex = mmCX - mmR + (e.x / CFG.MAP_W) * mmD;
+    const ey = mmCY - mmR + (e.y / CFG.MAP_H) * mmD;
+    ctx.fillRect(ex - s / 2, ey - s / 2, s, s);
   }
+  ctx.restore();
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(mmCX, mmCY, mmR, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.arc(mmCX, mmCY, mmR + 2, 0, Math.PI * 2);
+  ctx.stroke();
 }
 
 // ========== HUD DOM UPDATE ==========
@@ -1195,17 +1285,18 @@ function updateHUD() {
   const sec = Math.floor(remaining % 60);
   document.getElementById('timer-display').textContent = `${min}:${sec.toString().padStart(2, '0')}`;
   document.getElementById('timer-display').style.color = remaining < 60 ? '#ff4444' : '#fff';
-  document.getElementById('level-display').textContent = player.level;
   document.getElementById('kills-display').textContent = kills;
-  document.getElementById('total-xp-display').textContent = `EXP ${totalXP.toLocaleString()}`;
+  const liveScore = kills * 10 + Math.floor(gameTime) * 5 + player.level * 100;
+  document.getElementById('total-xp-display').textContent = `SCORE ${liveScore.toLocaleString()}`;
+  document.getElementById('xp-lv-label').textContent = `Lv.${player.level}`;
   document.getElementById('hp-text').textContent = `${Math.ceil(player.hp)}/${player.maxHp}`;
   document.getElementById('hp-bar-inner').style.width = `${(player.hp / player.maxHp) * 100}%`;
 
   const hpRatio = player.hp / player.maxHp;
   document.getElementById('hp-bar-inner').style.background =
-    hpRatio > 0.5 ? 'linear-gradient(to right,#4f9900,#84ff00)' :
-    hpRatio > 0.25 ? 'linear-gradient(to right,#cc8800,#ffcc00)' :
-    'linear-gradient(to right,#cc2200,#ff4444)';
+    hpRatio > 0.5 ? '#5cb800' :
+    hpRatio > 0.25 ? '#dda000' :
+    '#dd3300';
 
   // XP bar
   document.getElementById('xp-bar-inner').style.width = `${(player.xp / player.xpToNext) * 100}%`;
@@ -1238,7 +1329,7 @@ function gameLoop(timestamp) {
   const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
   lastTime = timestamp;
 
-  if (state === 'playing') {
+  if (state === 'playing' && !paused) {
     gameTime += dt;
     shakeTimer = Math.max(0, shakeTimer - dt);
 
@@ -1265,7 +1356,7 @@ function gameLoop(timestamp) {
     updateHUD();
   }
 
-  if (state === 'playing' || state === 'levelup') {
+  if ((state === 'playing' || state === 'levelup') && !paused) {
     render();
   }
 }

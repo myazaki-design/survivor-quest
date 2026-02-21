@@ -77,20 +77,14 @@ canvas{display:block;width:100%;height:100%}
 .skill-tag.upgrade{background:#6b4c1e;color:#fda}
 
 /* Title Screen */
-#title-screen{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(180deg,#1a0f2e 0%,#2d1b4e 50%,#1a0f2e 100%);overflow:hidden}
-#title-screen h1{font-size:38px;font-weight:900;color:#ffcc00;text-shadow:0 0 30px rgba(255,204,0,0.4),0 4px 8px rgba(0,0,0,0.5);margin-bottom:8px;letter-spacing:2px;animation:titlePulse 2s ease-in-out infinite}
-#title-screen .subtitle{font-size:15px;color:#a89cc8;margin-bottom:30px}
-#title-chars{display:flex;gap:16px;margin-bottom:30px;align-items:flex-end}
-#title-chars img{width:80px;height:80px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.5));animation:titleFloat 3s ease-in-out infinite}
-#title-chars img:nth-child(2){animation-delay:0.5s}
-#title-chars img:nth-child(3){animation-delay:1s}
-#title-chars img:nth-child(4){width:100px;height:100px;animation-delay:1.5s}
+#title-screen{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a0f2e url(assets/title_bg.jpg) center/cover no-repeat;overflow:hidden}
+#title-screen #start-btn,#title-screen #title-sound-btn{position:relative;z-index:1}
+#title-screen #start-btn{margin-top:600px}
 #start-btn{padding:16px 48px;font-size:22px;font-weight:700;color:#fff;background:linear-gradient(135deg,#e8433e,#c0392b);border:none;border-radius:30px;cursor:pointer;box-shadow:0 6px 20px rgba(232,67,62,0.4);transition:transform 0.15s;letter-spacing:1px;animation:btnPulse 1.5s ease-in-out infinite}
 #start-btn:hover,#start-btn:active{transform:scale(1.06)}
 #title-sound-btn{margin-top:24px;padding:10px 32px;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,#6c5b7b,#4a3f5c);border:none;border-radius:24px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:transform 0.15s;-webkit-tap-highlight-color:transparent}
 #title-sound-btn:hover,#title-sound-btn:active{transform:scale(1.04)}
 @keyframes titlePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
-@keyframes titleFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 @keyframes btnPulse{0%,100%{box-shadow:0 6px 20px rgba(232,67,62,0.4)}50%{box-shadow:0 6px 30px rgba(232,67,62,0.7)}}
 
 /* Result Screen */
@@ -177,14 +171,6 @@ canvas{display:block;width:100%;height:100%}
 
 <!-- Title -->
 <div id="title-screen">
-  <h1>SURVIVOR QUEST</h1>
-  <div class="subtitle">&#x2694;&#xFE0F; 生き残れ、勇者よ &#x2694;&#xFE0F;</div>
-  <div id="title-chars">
-    <img src="assets/green_slime.png" alt="">
-    <img src="assets/slime.png" alt="">
-    <img src="assets/player2.png" alt="">
-    <img src="assets/boss_slime.png" alt="">
-  </div>
   <button id="start-btn">&#x2694;&#xFE0F; スタート &#x2694;&#xFE0F;</button>
   <button id="title-sound-btn">🔊 サウンド: ON</button>
 </div>

@@ -34,19 +34,19 @@ canvas{display:block;width:100%;height:100%}
 #btn-title{background:linear-gradient(135deg,#e8433e,#c0392b);box-shadow:0 4px 16px rgba(232,67,62,0.4)}
 
 /* XP Bar (DOM) - Pixel style */
-#xp-bar-container{position:fixed;top:57px;left:16px;right:16px;z-index:10;display:none;pointer-events:none;flex-direction:row;align-items:center;gap:6px}
+#xp-bar-container{position:fixed;top:57px;left:16px;right:140px;z-index:10;display:none;pointer-events:none;flex-direction:row;align-items:center;gap:6px}
 #xp-lv-label{color:#fff;font-size:13px;font-weight:900;white-space:nowrap;min-width:32px;text-align:center;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
-#xp-bar-outer{flex:1;height:14px;background:#1a1a2e;border:2px solid #888;outline:1px solid #000;box-shadow:inset 0 0 0 2px #000;border-radius:7px;overflow:hidden;position:relative}
-#xp-bar-inner{height:100%;background:linear-gradient(to right,#1a5a8a,#2980b9,#3daee0);border-radius:5px;transition:width 0.15s;width:0%;outline:1px solid #000;box-sizing:border-box}
+#xp-bar-outer{flex:1;height:14px;background:#1a1a2e;border:1px solid #000;outline:1px solid #888;box-shadow:0 0 0 2px #000;border-radius:7px;overflow:hidden;position:relative}
+#xp-bar-inner{height:100%;background:#0ea5e9;border-radius:5px;transition:width 0.15s;width:0%;box-sizing:border-box}
 #xp-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:10px;font-weight:700;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
 
 /* HP Low Overlay - red corners when HP critical */
 #hp-low-overlay{position:fixed;inset:0;z-index:9;pointer-events:none;display:none;background:radial-gradient(ellipse 100% 100% at 50% 50%,transparent 35%,rgba(255,0,0,0.4) 100%)}
 
 /* HP Bar - Pixel style, below XP */
-#hp-bar-container{position:fixed;top:79px;left:16px;right:16px;z-index:10;display:none;flex-direction:row;align-items:center;gap:6px;pointer-events:none}
-#hp-bar-outer{flex:1;height:14px;background:#1a1a2e;border:2px solid #888;outline:1px solid #000;box-shadow:inset 0 0 0 2px #000;border-radius:7px;overflow:hidden;position:relative}
-#hp-bar-inner{height:100%;background:linear-gradient(to right,#3a8000,#5cb800,#78e000);border-radius:5px;transition:width 0.15s;width:100%;outline:1px solid #000;box-sizing:border-box}
+#hp-bar-container{position:fixed;top:79px;left:16px;right:140px;z-index:10;display:none;flex-direction:row;align-items:center;gap:6px;pointer-events:none}
+#hp-bar-outer{flex:1;height:14px;background:#1a1a2e;border:1px solid #000;outline:1px solid #888;box-shadow:0 0 0 2px #000;border-radius:7px;overflow:hidden;position:relative}
+#hp-bar-inner{height:100%;background:#32cd32;border-radius:5px;transition:width 0.15s;width:100%;box-sizing:border-box}
 #hp-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-size:10px;font-weight:700;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
 #hp-heart{color:#66ff00;font-size:16px;line-height:1;min-width:32px;text-align:center;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
 
@@ -87,6 +87,8 @@ canvas{display:block;width:100%;height:100%}
 #title-chars img:nth-child(4){width:100px;height:100px;animation-delay:1.5s}
 #start-btn{padding:16px 48px;font-size:22px;font-weight:700;color:#fff;background:linear-gradient(135deg,#e8433e,#c0392b);border:none;border-radius:30px;cursor:pointer;box-shadow:0 6px 20px rgba(232,67,62,0.4);transition:transform 0.15s;letter-spacing:1px;animation:btnPulse 1.5s ease-in-out infinite}
 #start-btn:hover,#start-btn:active{transform:scale(1.06)}
+#title-sound-btn{margin-top:24px;padding:10px 32px;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,#6c5b7b,#4a3f5c);border:none;border-radius:24px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:transform 0.15s;-webkit-tap-highlight-color:transparent}
+#title-sound-btn:hover,#title-sound-btn:active{transform:scale(1.04)}
 @keyframes titlePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
 @keyframes titleFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 @keyframes btnPulse{0%,100%{box-shadow:0 6px 20px rgba(232,67,62,0.4)}50%{box-shadow:0 6px 30px rgba(232,67,62,0.7)}}
@@ -101,9 +103,11 @@ canvas{display:block;width:100%;height:100%}
 #retry-btn{padding:14px 44px;font-size:20px;font-weight:700;color:#fff;background:linear-gradient(135deg,#3498db,#2980b9);border:none;border-radius:30px;cursor:pointer;box-shadow:0 6px 20px rgba(52,152,219,0.4);transition:transform 0.15s}
 #retry-btn:hover,#retry-btn:active{transform:scale(1.06)}
 
-/* Debug: Max All Skills */
+/* Debug: Max All Skills / Spawn All Enemies */
 #debug-max-btn{position:fixed;bottom:16px;right:16px;z-index:15;padding:8px 14px;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,0.6);border:2px solid rgba(255,200,0,0.6);border-radius:8px;cursor:pointer;display:none;pointer-events:auto;-webkit-tap-highlight-color:transparent}
 #debug-max-btn:hover,#debug-max-btn:active{background:rgba(255,200,0,0.25);border-color:#ffcc00}
+#debug-spawn-btn{position:fixed;bottom:16px;right:120px;z-index:15;padding:8px 14px;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,0.6);border:2px solid rgba(100,200,255,0.6);border-radius:8px;cursor:pointer;display:none;pointer-events:auto;-webkit-tap-highlight-color:transparent}
+#debug-spawn-btn:hover,#debug-spawn-btn:active{background:rgba(100,200,255,0.25);border-color:#64c8ff}
 </style>
 </head>
 <body>
@@ -152,8 +156,9 @@ canvas{display:block;width:100%;height:100%}
 <!-- Weapon Slots -->
 <div id="weapon-slots"></div>
 
-<!-- Debug: Max All Skills -->
+<!-- Debug: Max All Skills / Spawn All Enemies -->
 <button id="debug-max-btn">全スキルMAX</button>
+<button id="debug-spawn-btn">敵全種出現</button>
 
 <!-- Joystick Zone -->
 <div id="joystick-zone">
@@ -181,6 +186,7 @@ canvas{display:block;width:100%;height:100%}
     <img src="assets/boss_slime.png" alt="">
   </div>
   <button id="start-btn">&#x2694;&#xFE0F; スタート &#x2694;&#xFE0F;</button>
+  <button id="title-sound-btn">🔊 サウンド: ON</button>
 </div>
 
 <!-- Result -->
@@ -258,7 +264,9 @@ const ASSET_LIST = [
   ['storm1', 'assets/storm1.png'],
   ['storm2', 'assets/storm2.png'],
   ['storm3', 'assets/storm3.png'],
-  ['arrow_img', 'assets/arrow.png']
+  ['arrow_img', 'assets/arrow.png'],
+  ['thunder1', 'assets/thunder1.png'],
+  ['thunder2', 'assets/thunder2.png']
 ];
 
 function loadAssets() {
@@ -357,7 +365,7 @@ function generateDecorations() {
 const S = CFG.SPRITE_SCALE;
 const ENEMY_DEFS = {
   slime_green: { img: 'slime_green', hp: 20, atk: 5, speed: 50, size: 28, xp: 1, w: 36 * S, h: 36 * S },
-  slime_blue: { img: 'slime_blue', hp: 40, atk: 8, speed: 65, size: 32, xp: 2, w: 40 * S, h: 35 * S },
+  slime_blue: { img: 'slime_blue', hp: 40, atk: 8, speed: 65, size: 32, xp: 2, w: 58 * S, h: 58 * S },
   bat: { img: 'bat', hp: 15, atk: 10, speed: 120, size: 26, xp: 2, w: 52 * S, h: 28 * S, zigzag: true },
   golem: { img: 'golem', hp: 200, atk: 20, speed: 30, size: 38, xp: 5, w: 48 * S, h: 48 * S, knockbackResist: true },
   final_boss: { img: 'boss', hp: 20000, atk: 80, speed: 300, size: 200, xp: 100, w: 200 * S, h: 200 * S, boss: true, final: true }
@@ -527,7 +535,7 @@ function attackLightning(w) {
   const aoe = w.baseAoe + (w.level >= 5 ? 25 : w.level >= 2 ? 15 : 0);
   const targets = findNearestEnemies(player.x, player.y, count, 350);
   for (const t of targets) {
-    effects.push({ type: 'lightning', x: t.x, y: t.y, timer: 0.35, maxTime: 0.35 });
+    effects.push({ type: 'lightning', x: t.x, y: t.y, timer: 0.55, maxTime: 0.55 });
     for (const e of enemies) {
       if (e.active && dist(t.x, t.y, e.x, e.y) < aoe + e.size) {
         damageEnemy(e, dmg, t.x, t.y);
@@ -537,7 +545,7 @@ function attackLightning(w) {
 }
 
 function attackArrows(w) {
-  const count = w.level >= 5 ? 15 : w.level >= 3 ? 10 : w.baseCount;
+  const count = (w.level >= 5 ? 15 : w.level >= 3 ? 10 : w.baseCount) * 2;
   const range = 180 + w.level * 30;
   const spread = 90 + w.level * 22;
   const dmg = getWeaponDamage(w);
@@ -546,7 +554,8 @@ function attackArrows(w) {
   for (let i = 0; i < count; i++) {
     const ax = cx + rand(-spread, spread);
     const ay = cy + rand(-spread, spread);
-    effects.push({ type: 'arrow', x: ax, y: ay - 80, ty: ay, dmg, timer: 0.5, maxTime: 0.5, hit: false });
+    const maxTime = 0.35 + Math.random() * 0.35;
+    effects.push({ type: 'arrow', x: ax, y: ay - 80, ty: ay, dmg, timer: maxTime, maxTime, hit: false });
   }
 }
 
@@ -557,8 +566,8 @@ function findNearestEnemies(x, y, n, maxDist) {
 }
 
 // ========== ENEMY LOGIC ==========
-function spawnEnemy(type) {
-  if (enemies.filter(e => e.active).length >= CFG.MAX_ENEMIES) return;
+function spawnEnemy(type, ignoreMax = false) {
+  if (!ignoreMax && enemies.filter(e => e.active).length >= CFG.MAX_ENEMIES) return;
   const def = ENEMY_DEFS[type];
   if (!def) return;
   const side = randInt(0, 3);
@@ -772,7 +781,7 @@ function updateSpawner(dt) {
   if (wave.spawnBoss) {
     if (!bossSpawned[wave.t]) {
       bossSpawned[wave.t] = true;
-      spawnEnemy(wave.spawnBoss);
+      spawnEnemy(wave.spawnBoss, true);
       shakeTimer = 0.5; shakeIntensity = 8;
     }
   }
@@ -907,6 +916,12 @@ function applyPassives() {
   player.pickupRange = 60 * (1 + (player.passives.magnet || 0) * 0.2);
 }
 
+function debugSpawnAllEnemies() {
+  for (const type of Object.keys(ENEMY_DEFS)) {
+    spawnEnemy(type);
+  }
+}
+
 function debugMaxAllSkills() {
   for (const wd of WEAPON_DEFS) {
     const owned = player.weapons.find(w => w.id === wd.id);
@@ -937,6 +952,7 @@ function startGame() {
   document.getElementById('hp-bar-container').style.display = 'flex';
   document.getElementById('hp-low-overlay').style.display = 'none';
   document.getElementById('debug-max-btn').style.display = 'block';
+  document.getElementById('debug-spawn-btn').style.display = 'block';
 
   gameTime = 0; kills = 0; totalXP = 0; levelupPending = false;
   shakeTimer = 0; spawnTimer = 0; bossSpawned = {}; statMul = 1; damageShakeTimer = 0;
@@ -981,6 +997,7 @@ function showResult(cleared) {
   document.getElementById('weapon-slots').style.display = 'none';
   document.getElementById('pause-btn').style.display = 'none';
   document.getElementById('debug-max-btn').style.display = 'none';
+  document.getElementById('debug-spawn-btn').style.display = 'none';
   document.getElementById('hp-low-overlay').style.display = 'none';
   document.getElementById('pause-overlay').style.display = 'none';
   paused = false;
@@ -1113,8 +1130,16 @@ function setupInput() {
 
   document.getElementById('start-btn').onclick = () => { playSE('click'); startGame(); };
   document.getElementById('retry-btn').onclick = () => { playSE('click'); startGame(); };
+  document.getElementById('title-sound-btn').onclick = () => {
+    soundOn = !soundOn;
+    document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
+    document.getElementById('btn-sound').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
+    playSE('click');
+  };
   document.getElementById('debug-max-btn').addEventListener('click', () => { playSE('click'); debugMaxAllSkills(); });
   document.getElementById('debug-max-btn').addEventListener('touchend', (e) => { e.preventDefault(); playSE('click'); debugMaxAllSkills(); });
+  document.getElementById('debug-spawn-btn').addEventListener('click', () => { playSE('click'); debugSpawnAllEnemies(); });
+  document.getElementById('debug-spawn-btn').addEventListener('touchend', (e) => { e.preventDefault(); playSE('click'); debugSpawnAllEnemies(); });
 
   const pauseBtn = document.getElementById('pause-btn');
   const pauseOverlay = document.getElementById('pause-overlay');
@@ -1156,9 +1181,11 @@ function setupInput() {
     document.getElementById('hp-bar-container').style.display = 'none';
     document.getElementById('weapon-slots').style.display = 'none';
     document.getElementById('pause-btn').style.display = 'none';
-    document.getElementById('debug-max-btn').style.display = 'none';
-    document.getElementById('hp-low-overlay').style.display = 'none';
-    document.getElementById('title-screen').style.display = 'flex';
+  document.getElementById('debug-max-btn').style.display = 'none';
+  document.getElementById('debug-spawn-btn').style.display = 'none';
+  document.getElementById('hp-low-overlay').style.display = 'none';
+  document.getElementById('title-screen').style.display = 'flex';
+  document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
   });
 }
 
@@ -1412,21 +1439,30 @@ function drawEffectsBehind() {
 
     if (ef.type === 'lightning') {
       ctx.save();
-      ctx.strokeStyle = `rgba(180,200,255,${alpha})`;
-      ctx.lineWidth = 4;
-      ctx.shadowColor = '#88aaff';
-      ctx.shadowBlur = 22;
-      let lx = ef.x + rand(-8, 8), ly = ef.y - 220;
-      ctx.beginPath(); ctx.moveTo(lx, ly);
-      for (let i = 0; i < 8; i++) {
-        lx = ef.x + rand(-18, 18);
-        ly += 28;
-        ctx.lineTo(lx, ly);
+      const lightningAlpha = ef.timer > 0.2 ? 1 : ef.timer / 0.2;
+      ctx.globalAlpha = lightningAlpha;
+      const THUNDER_FRAMES = ['thunder1', 'thunder2'];
+      const thunderImg = IMG[THUNDER_FRAMES[Math.floor((ef.maxTime - ef.timer) / 0.03) % 2]];
+      if (thunderImg) {
+        const tw = 60, th = 240;
+        ctx.drawImage(thunderImg, ef.x - tw / 2, ef.y - th + 20, tw, th);
+      } else {
+        ctx.strokeStyle = `rgba(180,200,255,${lightningAlpha})`;
+        ctx.lineWidth = 4;
+        ctx.shadowColor = '#88aaff';
+        ctx.shadowBlur = 22;
+        let lx = ef.x + rand(-8, 8), ly = ef.y - 220;
+        ctx.beginPath(); ctx.moveTo(lx, ly);
+        for (let i = 0; i < 8; i++) {
+          lx = ef.x + rand(-18, 18);
+          ly += 28;
+          ctx.lineTo(lx, ly);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
       }
-      ctx.stroke();
-      ctx.fillStyle = `rgba(200,220,255,${alpha * 0.3})`;
+      ctx.fillStyle = `rgba(200,220,255,${lightningAlpha * 0.3})`;
       ctx.beginPath(); ctx.arc(ef.x, ef.y, 45, 0, Math.PI * 2); ctx.fill();
-      ctx.shadowBlur = 0;
       ctx.restore();
     }
 
@@ -1436,7 +1472,10 @@ function drawEffectsBehind() {
       if (IMG.arrow_img) {
         ctx.save();
         ctx.globalAlpha = alpha;
-        const aw = 14, ah = 40;
+        const img = IMG.arrow_img;
+        const nw = img.naturalWidth || 67, nh = img.naturalHeight || 284;
+        const scale = 60 / nh;
+        const aw = nw * scale, ah = nh * scale;
         ctx.drawImage(IMG.arrow_img, ef.x - aw / 2, ay - ah / 2, aw, ah);
         ctx.restore();
       } else {
@@ -1517,7 +1556,7 @@ function drawDamageNums() {
   for (const d of damageNums) {
     const alpha = Math.max(0, d.timer / 0.6);
     ctx.globalAlpha = alpha;
-    ctx.font = '900 18px sans-serif';
+    ctx.font = '900 17px sans-serif';
     ctx.textAlign = 'center';
     ctx.lineWidth = 3;
     ctx.strokeStyle = '#000';
@@ -1587,9 +1626,7 @@ function updateHUD(dt) {
 
   const hpRatio = player.hp / player.maxHp;
   document.getElementById('hp-bar-inner').style.background =
-    hpRatio > 0.5 ? 'linear-gradient(to right,#3a8000,#5cb800,#78e000)' :
-    hpRatio > 0.25 ? 'linear-gradient(to right,#aa7a00,#dda000,#eebb22)' :
-    'linear-gradient(to right,#aa2200,#dd3300,#ee5522)';
+    hpRatio > 0.5 ? '#32cd32' : hpRatio > 0.25 ? '#f59e0b' : '#ef4444';
 
   const hpLowOverlay = document.getElementById('hp-low-overlay');
   hpLowOverlay.style.display = hpRatio <= 0.25 ? 'block' : 'none';
@@ -1599,8 +1636,8 @@ function updateHUD(dt) {
   }
   const hpBar = document.getElementById('hp-bar-container');
   if (damageShakeTimer > 0) {
-    const step = Math.floor(performance.now() / 55) % 8;
-    const positions = [[-8, -6, -2], [8, 4, 1.5], [-6, 8, -1.5], [6, -4, 2], [8, 6, -2], [-8, -4, 1.5], [4, 8, -1.5], [-6, -6, 2]];
+    const step = Math.floor(performance.now() / 70) % 8;
+    const positions = [[-2, -1.5, -0.5], [2, 1, 0.4], [-1.5, 2, -0.4], [1.5, -1, 0.5], [2, 1.5, -0.5], [-2, -1, 0.4], [1, 2, -0.4], [-1.5, -1.5, 0.5]];
     const [shakeX, shakeY, tilt] = positions[step];
     hpBar.style.transform = `translate(${shakeX}px,${shakeY}px) rotate(${tilt}deg)`;
   } else {

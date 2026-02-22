@@ -665,7 +665,7 @@ function updateEnemies(dt) {
     shakeTimer = 0.15; shakeIntensity = 4;
     damageShakeTimer = 0.6;
     damageNums.push({ x: player.x, y: player.y - 20, val: Math.round(highestDmg), color: '#ff4444', timer: 0.8 });
-    playSE('damage', 1000);
+    playSE('damage', 800);
     if (player.hp <= 0) { player.hp = 0; gameOver(); }
   }
 }
@@ -675,7 +675,7 @@ function damageEnemy(e, dmg, fx, fy) {
   e.hp -= dmg;
   e.flashTimer = 0.2;
   damageNums.push({ x: e.x + rand(-10, 10), y: e.y - e.size, val: Math.round(dmg), color: '#ffff44', timer: 0.6 });
-  playSE('damage', 1000);
+  playSE('damage', 800);
   if (!e.knockbackResist) {
     const ka = angle(fx, fy, e.x, e.y);
     e.kbx = Math.cos(ka) * 160;

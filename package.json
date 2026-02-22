@@ -1,0 +1,9 @@
+{
+  "name": "survivor-quest",
+  "version": "1.0.0",
+  "description": "Survivor Quest - ブラウザサバイバルアクションゲーム",
+  "scripts": {
+    "start": "npx serve -l 3000",
+    "serve": "python3 -m http.server 8000"
+  }
+}

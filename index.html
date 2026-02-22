@@ -22,8 +22,8 @@ canvas{display:block;width:100%;height:100%}
 #timer-display{font-size:13px}
 #hud-kills{color:#fff;font-size:13px;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
 #total-xp-display{font-size:16px;font-weight:900;color:#ffcc00;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000;letter-spacing:1px;padding:4px 20px}
-#pause-btn{position:fixed;top:10px;right:12px;z-index:20;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,0.4);border:2px solid rgba(255,255,255,0.3);color:#fff;font-size:20px;display:none;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
-#pause-btn:active{background:rgba(255,255,255,0.2)}
+#pause-btn{position:fixed;top:10px;right:12px;z-index:20;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#6c6c6c,#4a4a4a);border:none;box-shadow:0 4px 16px rgba(0,0,0,0.4);color:#fff;font-size:22px;display:none;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform 0.15s}
+#pause-btn:hover,#pause-btn:active{transform:scale(1.06);box-shadow:0 6px 20px rgba(0,0,0,0.5)}
 #pause-overlay{position:fixed;inset:0;z-index:90;display:none;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;flex-direction:column}
 #pause-dialog{background:linear-gradient(180deg,#1a0f2e 0%,#2d1b4e 50%,#1a0f2e 100%);border:2px solid #5a4a7a;outline:1px solid #000;border-radius:20px;padding:32px 40px;min-width:300px;display:flex;flex-direction:column;align-items:center;gap:16px;pointer-events:auto;box-shadow:0 8px 40px rgba(0,0,0,0.6)}
 #pause-dialog h3{color:#ffcc00;font-size:24px;font-weight:900;margin:0 0 4px 0;letter-spacing:2px;text-shadow:0 0 20px rgba(255,204,0,0.4),-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
@@ -58,11 +58,11 @@ canvas{display:block;width:100%;height:100%}
 #weapon-slots .slot .slot-lv.passive{color:#88aaff}
 
 /* Level Up Screen */
-#levelup-screen{position:fixed;inset:0;z-index:100;display:none;background:rgba(0,0,0,0.75);flex-direction:column;align-items:center;justify-content:center;padding:20px;cursor:pointer;overflow:hidden}
-#levelup-title-wrap{position:relative;display:inline-block;margin-bottom:24px;overflow:visible}
-#levelup-particles{position:absolute;left:50%;top:50%;width:400px;height:120px;margin-left:-200px;margin-top:-60px;pointer-events:none;z-index:0}
-.levelup-confetti{position:absolute;left:50%;top:50%;animation:confettiBurst 0.8s ease-out forwards}
-@keyframes confettiBurst{0%{transform:translate(-50%,-50%) scale(0) rotate(0deg);opacity:1}100%{transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty))) scale(1) rotate(720deg);opacity:0}}
+#levelup-screen{position:fixed;inset:0;z-index:100;display:none;background:rgba(0,0,0,0.75);flex-direction:column;align-items:center;justify-content:center;padding:20px;cursor:pointer;overflow:visible}
+#levelup-title-wrap{position:relative;display:inline-block;margin-bottom:24px;overflow:visible;z-index:2}
+#levelup-particles{position:fixed;left:50%;top:50%;width:400px;height:120px;margin-left:-200px;margin-top:-60px;pointer-events:none;z-index:110}
+.levelup-confetti{position:absolute;left:50%;top:50%;animation:confettiBurst linear forwards;box-shadow:0 0 4px rgba(255,255,255,0.6)}
+@keyframes confettiBurst{0%{transform:translate(-50%,-50%) scale(0) rotate(0deg);opacity:1}20%{transform:translate(calc(-50% + var(--tx)*0.88),calc(-50% + var(--ty)*0.88)) scale(1) rotate(400deg);opacity:1}100%{transform:translate(calc(-50% + var(--tx)),calc(-50% + var(--ty))) scale(1) rotate(720deg);opacity:0}}
 #levelup-title{color:#ffcc00;font-size:32px;font-weight:900;text-shadow:0 0 20px rgba(255,204,0,0.5);position:relative;z-index:1}
 #skill-choices{position:relative;z-index:1}
 .skill-card{width:280px;margin:8px 0;padding:16px;background:linear-gradient(135deg,#2a1f3d,#1a1428);border:2px solid #5a4a7a;border-radius:16px;cursor:pointer;transition:transform 0.15s,border-color 0.15s;color:#fff}
@@ -225,30 +225,64 @@ const SE_LIST = [
   ['damage', 'assets/damage.mp3'],
   ['fire', 'assets/fire.mp3'],
   ['thunder', 'assets/thunder.mp3'],
-  ['click', 'assets/click.mp3']
+  ['click', 'assets/click.mp3'],
+  ['levelup', 'assets/levelup.wav']
 ];
 const seCooldowns = {};
+const DAMAGE_POOL_SIZE = 5;
+const damagePool = [];
+let damagePoolIndex = 0;
 
 function loadSounds(onProgress) {
-  return Promise.all(SE_LIST.map(([key, src]) => new Promise((resolve) => {
-    const audio = new Audio(src);
-    audio.preload = 'auto';
-    audio.volume = 0.5;
-    SE[key] = audio;
-    const done = () => { if (onProgress) onProgress(); resolve(); };
-    audio.addEventListener('canplaythrough', done, { once: true });
-    audio.addEventListener('error', done, { once: true });
-    audio.load();
-  })));
+  const promises = [];
+  for (const [key, src] of SE_LIST) {
+    if (key === 'damage') {
+      const damagePromises = [];
+      for (let i = 0; i < DAMAGE_POOL_SIZE; i++) {
+        damagePromises.push(new Promise((resolve) => {
+          const audio = new Audio(src);
+          audio.preload = 'auto';
+          audio.volume = 0.5;
+          damagePool.push(audio);
+          audio.addEventListener('canplaythrough', resolve, { once: true });
+          audio.addEventListener('error', resolve, { once: true });
+          audio.load();
+        }));
+      }
+      promises.push(Promise.all(damagePromises).then(() => { if (onProgress) onProgress(); }));
+      SE['damage'] = damagePool[0];
+    } else {
+      promises.push(new Promise((resolve) => {
+        const audio = new Audio(src);
+        audio.preload = 'auto';
+        audio.volume = 0.5;
+        SE[key] = audio;
+        const done = () => { if (onProgress) onProgress(); resolve(); };
+        audio.addEventListener('canplaythrough', done, { once: true });
+        audio.addEventListener('error', done, { once: true });
+        audio.load();
+      }));
+    }
+  }
+  return Promise.all(promises);
 }
 
 function playSE(key, cooldown) {
-  if (!soundOn || !SE[key]) return;
+  if (!soundOn) return;
   const now = performance.now();
   if (cooldown) {
     if (seCooldowns[key] && now - seCooldowns[key] < cooldown) return;
     seCooldowns[key] = now;
   }
+  if (key === 'damage' && damagePool.length > 0) {
+    const a = damagePool[damagePoolIndex % damagePool.length];
+    damagePoolIndex++;
+    a.currentTime = 0;
+    a.volume = 0.5;
+    a.play().catch(() => {});
+    return;
+  }
+  if (!SE[key]) return;
   const s = SE[key].cloneNode();
   s.volume = SE[key].volume;
   s.play().catch(() => {});
@@ -322,7 +356,7 @@ function resize() {
   canvasH = window.innerHeight;
   canvas.width = canvasW;
   canvas.height = canvasH;
-  gameScale = Math.min(canvasW / CFG.VIEW_W, canvasH / CFG.VIEW_H);
+  gameScale = Math.max(canvasW / CFG.VIEW_W, canvasH / CFG.VIEW_H);
   gameOffX = (canvasW - CFG.VIEW_W * gameScale) / 2;
   gameOffY = (canvasH - CFG.VIEW_H * gameScale) / 2;
 }
@@ -364,22 +398,22 @@ let damageNums = [];
 const S = CFG.SPRITE_SCALE;
 const ENEMY_DEFS = {
   slime_green: { img: 'slime_green', hp: 20, atk: 5, speed: 50, size: 28, xp: 1, w: 36 * S, h: 36 * S },
-  slime_blue: { img: 'slime_blue', hp: 40, atk: 8, speed: 65, size: 32, xp: 2, w: 58 * S, h: 58 * S },
-  bat: { img: 'bat', hp: 15, atk: 10, speed: 120, size: 26, xp: 2, w: 52 * S, h: 28 * S, zigzag: true },
-  golem: { img: 'golem', hp: 200, atk: 20, speed: 30, size: 38, xp: 5, w: 48 * S, h: 48 * S, knockbackResist: true },
-  final_boss: { img: 'boss', hp: 20000, atk: 80, speed: 300, size: 150, xp: 100, w: 200 * S, h: 200 * S, boss: true, final: true }
+  slime_blue: { img: 'slime_blue', hp: 70, atk: 8, speed: 65, size: 32, xp: 2, w: 58 * S, h: 58 * S },
+  bat: { img: 'bat', hp: 15, atk: 10, speed: 150, size: 26, xp: 2, w: 52 * S, h: 28 * S, zigzag: true },
+  golem: { img: 'golem', hp: 200, atk: 20, speed: 80, size: 46, xp: 5, w: 58 * S, h: 58 * S, knockbackResist: true },
+  final_boss: { img: 'boss', hp: 20000, atk: 80, speed: 294, size: 150, xp: 100, w: 200 * S, h: 200 * S, boss: true, final: true }
 };
 
 // ========== WAVE TIMELINE (3分・2分でボス) ==========
 const WAVES = [
   { t: 0, types: ['slime_green'], interval: 0.5, max: 35 },
-  { t: 20, types: ['slime_green', 'slime_blue'], interval: 0.4, max: 45 },
-  { t: 45, types: ['slime_green', 'slime_blue', 'bat'], interval: 0.35, max: 55 },
-  { t: 70, types: ['slime_blue', 'bat', 'golem'], interval: 0.3, max: 65 },
-  { t: 100, types: ['slime_blue', 'bat', 'golem'], interval: 0.25, max: 75 },
-  { t: 120, types: ['slime_blue', 'bat', 'golem'], interval: 0.2, max: 85, spawnBoss: 'final_boss' },
-  { t: 121, types: ['bat', 'golem'], interval: 0.18, max: 90 },
-  { t: 165, types: ['bat', 'golem', 'slime_blue'], interval: 0.15, max: 100 }
+  { t: 15, types: ['slime_green', 'slime_green', 'slime_blue'], interval: 0.4, max: 42 },
+  { t: 30, types: ['slime_green', 'slime_green', 'slime_blue', 'bat'], interval: 0.35, max: 50 },
+  { t: 50, types: ['slime_blue', 'bat', 'golem'], interval: 0.3, max: 60 },
+  { t: 100, types: ['slime_blue', 'bat', 'golem'], interval: 0.25, max: 70 },
+  { t: 120, types: ['slime_blue', 'bat', 'golem'], interval: 0.2, max: 80, spawnBoss: 'final_boss' },
+  { t: 121, types: ['bat', 'golem'], interval: 0.18, max: 85 },
+  { t: 165, types: ['bat', 'golem', 'slime_blue'], interval: 0.15, max: 95 }
 ];
 
 let currentWave = 0;
@@ -801,27 +835,29 @@ function spawnLevelUpPetals() {
   const container = document.getElementById('levelup-particles');
   container.innerHTML = '';
   const colors = ['#ff4444','#ffcc00','#44ff44','#4488ff','#ff44ff','#ff8844','#44ffff','#ffffff'];
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 120; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const dist = 60 + Math.random() * 90;
-    const tx = Math.cos(angle) * dist * 1.5;
-    const ty = Math.sin(angle) * dist * 0.4;
+    const dist = 80 + Math.random() * 180;
+    const tx = Math.cos(angle) * dist * (1.5 + Math.random() * 0.8);
+    const ty = Math.sin(angle) * dist * (0.5 + Math.random() * 0.5);
     const p = document.createElement('div');
     p.className = 'levelup-confetti';
     p.style.setProperty('--tx', tx + 'px');
     p.style.setProperty('--ty', ty + 'px');
     p.style.background = colors[Math.floor(Math.random() * colors.length)];
-    p.style.width = (2 + Math.random() * 3) + 'px';
-    p.style.height = (2 + Math.random() * 2) + 'px';
-    p.style.borderRadius = Math.random() < 0.3 ? '50%' : '2px';
-    p.style.animationDelay = (Math.random() * 0.15) + 's';
-    p.style.animationDuration = (0.4 + Math.random() * 0.6) + 's';
+    const baseSize = 1 + Math.random() * 4;
+    p.style.width = (baseSize * (0.6 + Math.random() * 0.8)) + 'px';
+    p.style.height = (baseSize * (0.5 + Math.random() * 0.6)) + 'px';
+    p.style.borderRadius = '0';
+    p.style.animationDelay = (Math.random() * 0.12) + 's';
+    p.style.animationDuration = (0.25 + Math.random() * 0.55) + 's';
     container.appendChild(p);
   }
 }
 
 function showLevelUpUI() {
   state = 'levelup';
+  playSE('levelup');
   spawnLevelUpPetals();
   const choices = generateChoices(3);
   const container = document.getElementById('skill-choices');
@@ -1255,11 +1291,13 @@ function render() {
   drawXPGems();
   drawEffectsBehind();
   drawEnemies();
-  drawProjectiles();
   const swordBehind = player.facing.y < -0.1;
   if (swordBehind) drawEffectsFront();
   drawPlayer();
   if (!swordBehind) drawEffectsFront();
+  drawBoss();
+  drawProjectiles();
+  drawLightning();
   drawDamageNums();
 
   ctx.setTransform(gameScale, 0, 0, gameScale, gameOffX, gameOffY);
@@ -1328,6 +1366,7 @@ function drawPlayer() {
 function drawEnemies() {
   for (const e of enemies) {
     if (!e.active) continue;
+    if (e.boss) continue;
     if (e.x < camera.x - 200 || e.x > camera.x + CFG.VIEW_W + 200 || e.y < camera.y - 200 || e.y > camera.y + CFG.VIEW_H + 200) continue;
 
     const jy = e.jumpH || 0;
@@ -1394,6 +1433,68 @@ function drawEnemies() {
   }
 }
 
+function drawBoss() {
+  for (const e of enemies) {
+    if (!e.active || !e.boss) continue;
+    if (e.x < camera.x - 200 || e.x > camera.x + CFG.VIEW_W + 200 || e.y < camera.y - 200 || e.y > camera.y + CFG.VIEW_H + 200) continue;
+
+    const jy = e.jumpH || 0;
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+    ctx.shadowBlur = ENEMY_SHADOW_BLUR;
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.beginPath();
+    let shYOff = e.h * 0.35, shRx = e.w * 0.22, shRy = Math.max(4, e.h * 0.06);
+    ctx.ellipse(e.x, e.y + shYOff, shRx, shRy, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    const def = ENEMY_DEFS[e.type];
+    const img = IMG[def.img];
+    const breathE = 1 + Math.sin(performance.now() * 0.005 + e.x * 0.1) * 0.03;
+    const eFoot = e.y + jy + e.h / 2;
+    ctx.translate(e.x, eFoot);
+    ctx.scale(breathE, breathE);
+    ctx.translate(-e.x, -eFoot);
+    if (img) {
+      if (e.flashTimer > 0) {
+        const glow = e.flashTimer / 0.2;
+        if (isMobile) ctx.globalAlpha = 0.5 + glow * 0.5;
+        else ctx.filter = `brightness(${1 + glow * 0.6}) saturate(${1 + glow * 0.6}) hue-rotate(${-25 * glow}deg)`;
+      }
+      ctx.drawImage(img, e.x - e.w / 2, e.y + jy - e.h / 2, e.w, e.h);
+      if (e.flashTimer > 0) { ctx.filter = 'none'; ctx.globalAlpha = 1; }
+    } else {
+      ctx.fillStyle = '#ff4466';
+      ctx.beginPath(); ctx.arc(e.x, e.y + jy, e.size, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+
+    const bw = 70, bh = 6, r = 3;
+    const bx = e.x - bw / 2, by = e.y + jy - e.h / 2 - 10;
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
+    roundRect(ctx, bx - 1, by - 1, bw + 2, bh + 2, r + 1);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    roundRect(ctx, bx, by, bw, bh, r);
+    ctx.fill();
+    ctx.fillStyle = '#ff4444';
+    const fillW = Math.max(0, bw * (e.hp / e.maxHp) - 0.01);
+    if (fillW > 0) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(bx, by, fillW, bh);
+      ctx.clip();
+      roundRect(ctx, bx, by, bw, bh, r);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+}
+
 function drawXPGems() {
   for (const g of xpGems) {
     if (g.x < camera.x - 10 || g.x > camera.x + CFG.VIEW_W + 10 || g.y < camera.y - 10 || g.y > camera.y + CFG.VIEW_H + 10) continue;
@@ -1445,84 +1546,13 @@ function drawEffectsBehind() {
     if (ef.type === 'sword_swing') continue;
     const alpha = Math.max(0, ef.timer / ef.maxTime);
 
-    if (ef.type === 'lightning') {
-      ctx.save();
-      const lightningAlpha = ef.timer > 0.2 ? 1 : ef.timer / 0.2;
-      ctx.globalAlpha = lightningAlpha;
-      const THUNDER_FRAMES = ['thunder1', 'thunder2'];
-      const thunderImg = IMG[THUNDER_FRAMES[Math.floor((ef.maxTime - ef.timer) / 0.03) % 2]];
-      if (thunderImg) {
-        const tw = 60, th = 240;
-        ctx.drawImage(thunderImg, ef.x - tw / 2, ef.y - th + 20, tw, th);
-      } else {
-        ctx.strokeStyle = `rgba(180,200,255,${lightningAlpha})`;
-        ctx.lineWidth = 4;
-        ctx.shadowColor = '#88aaff';
-        ctx.shadowBlur = 22;
-        let lx = ef.x + rand(-8, 8), ly = ef.y - 220;
-        ctx.beginPath(); ctx.moveTo(lx, ly);
-        for (let i = 0; i < 8; i++) {
-          lx = ef.x + rand(-18, 18);
-          ly += 28;
-          ctx.lineTo(lx, ly);
-        }
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-      }
-      ctx.fillStyle = `rgba(200,220,255,${lightningAlpha * 0.3})`;
-      ctx.beginPath(); ctx.arc(ef.x, ef.y, 45, 0, Math.PI * 2); ctx.fill();
-      ctx.restore();
-    }
-
-    if (ef.type === 'arrow') {
-      const prog = 1 - ef.timer / ef.maxTime;
-      const ay = ef.y + (ef.ty - ef.y + 120) * prog;
-      if (IMG.arrow_img) {
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        const img = IMG.arrow_img;
-        const nw = img.naturalWidth || 67, nh = img.naturalHeight || 284;
-        const scale = 60 / nh;
-        const aw = nw * scale, ah = nh * scale;
-        ctx.drawImage(IMG.arrow_img, ef.x - aw / 2, ay - ah / 2, aw, ah);
-        ctx.restore();
-      } else {
-        ctx.strokeStyle = `rgba(200,180,120,${alpha})`;
-        ctx.lineWidth = 3;
-        ctx.beginPath(); ctx.moveTo(ef.x, ay); ctx.lineTo(ef.x, ay + 18); ctx.stroke();
-        ctx.fillStyle = `rgba(200,180,120,${alpha})`;
-        ctx.beginPath(); ctx.moveTo(ef.x, ay); ctx.lineTo(ef.x - 5, ay + 8); ctx.lineTo(ef.x + 5, ay + 8); ctx.fill();
-      }
-    }
+    if (ef.type === 'lightning' || ef.type === 'arrow') continue;
 
     if (ef.type === 'particle') {
       ctx.fillStyle = ef.color;
       ctx.globalAlpha = alpha;
       ctx.beginPath(); ctx.arc(ef.x, ef.y, ef.size * alpha, 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
-    }
-  }
-
-  // Whirlwind orbs
-  const STORM_FRAMES = ['storm1', 'storm2', 'storm3'];
-  const STORM_FRAME_MS = 90;
-  for (const w of player.weapons) {
-    if (w.id !== 'whirlwind') continue;
-    const count = w.level >= 5 ? 3 : w.level >= 3 ? 2 : 1;
-    const radius = w.baseRadius + (w.level >= 4 ? 20 : 0);
-    for (let i = 0; i < count; i++) {
-      const a = w.angle + (Math.PI * 2 / count) * i;
-      const ox = player.x + Math.cos(a) * radius;
-      const oy = player.y + Math.sin(a) * radius;
-      const sfi = Math.floor((performance.now() / STORM_FRAME_MS + i * 0.5) % 3);
-      const stormImg = IMG[STORM_FRAMES[sfi]];
-      if (stormImg) {
-        const ss = (44 + w.level * 3) * 2;
-        ctx.drawImage(stormImg, ox - ss / 2, oy - ss / 2, ss, ss);
-      } else {
-        ctx.fillStyle = 'rgba(150,255,200,0.5)';
-        ctx.beginPath(); ctx.arc(ox, oy, 18 + w.level * 1.5, 0, Math.PI * 2); ctx.fill();
-      }
     }
   }
 }
@@ -1560,6 +1590,83 @@ function drawEffectsFront() {
   }
 }
 
+function drawLightning() {
+  for (const ef of effects) {
+    if (ef.type === 'arrow') {
+      const alpha = Math.max(0, ef.timer / ef.maxTime);
+      const prog = 1 - ef.timer / ef.maxTime;
+      const ay = ef.y + (ef.ty - ef.y + 120) * prog;
+      if (IMG.arrow_img) {
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        const img = IMG.arrow_img;
+        const nw = img.naturalWidth || 67, nh = img.naturalHeight || 284;
+        const scale = 60 / nh;
+        const aw = nw * scale, ah = nh * scale;
+        ctx.drawImage(IMG.arrow_img, ef.x - aw / 2, ay - ah / 2, aw, ah);
+        ctx.restore();
+      } else {
+        ctx.strokeStyle = `rgba(200,180,120,${alpha})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(ef.x, ay); ctx.lineTo(ef.x, ay + 18); ctx.stroke();
+        ctx.fillStyle = `rgba(200,180,120,${alpha})`;
+        ctx.beginPath(); ctx.moveTo(ef.x, ay); ctx.lineTo(ef.x - 5, ay + 8); ctx.lineTo(ef.x + 5, ay + 8); ctx.fill();
+      }
+      continue;
+    }
+    if (ef.type !== 'lightning') continue;
+    ctx.save();
+    const lightningAlpha = ef.timer > 0.2 ? 1 : ef.timer / 0.2;
+    ctx.globalAlpha = lightningAlpha;
+    const THUNDER_FRAMES = ['thunder1', 'thunder2'];
+    const thunderImg = IMG[THUNDER_FRAMES[Math.floor((ef.maxTime - ef.timer) / 0.03) % 2]];
+    if (thunderImg) {
+      const tw = 60, th = 240;
+      ctx.drawImage(thunderImg, ef.x - tw / 2, ef.y - th + 20, tw, th);
+    } else {
+      ctx.strokeStyle = `rgba(180,200,255,${lightningAlpha})`;
+      ctx.lineWidth = 4;
+      ctx.shadowColor = '#88aaff';
+      ctx.shadowBlur = 22;
+      let lx = ef.x + rand(-8, 8), ly = ef.y - 220;
+      ctx.beginPath(); ctx.moveTo(lx, ly);
+      for (let i = 0; i < 8; i++) {
+        lx = ef.x + rand(-18, 18);
+        ly += 28;
+        ctx.lineTo(lx, ly);
+      }
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+    ctx.fillStyle = `rgba(200,220,255,${lightningAlpha * 0.3})`;
+    ctx.beginPath(); ctx.arc(ef.x, ef.y, 45, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  // Whirlwind orbs (storm)
+  const STORM_FRAMES = ['storm1', 'storm2', 'storm3'];
+  const STORM_FRAME_MS = 90;
+  for (const w of player.weapons) {
+    if (w.id !== 'whirlwind') continue;
+    const count = w.level >= 5 ? 3 : w.level >= 3 ? 2 : 1;
+    const radius = w.baseRadius + (w.level >= 4 ? 20 : 0);
+    for (let i = 0; i < count; i++) {
+      const a = w.angle + (Math.PI * 2 / count) * i;
+      const ox = player.x + Math.cos(a) * radius;
+      const oy = player.y + Math.sin(a) * radius;
+      const sfi = Math.floor((performance.now() / STORM_FRAME_MS + i * 0.5) % 3);
+      const stormImg = IMG[STORM_FRAMES[sfi]];
+      if (stormImg) {
+        const ss = (44 + w.level * 3) * 2;
+        ctx.drawImage(stormImg, ox - ss / 2, oy - ss / 2, ss, ss);
+      } else {
+        ctx.fillStyle = 'rgba(150,255,200,0.5)';
+        ctx.beginPath(); ctx.arc(ox, oy, 18 + w.level * 1.5, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+}
+
 function drawDamageNums() {
   for (const d of damageNums) {
     const alpha = Math.max(0, d.timer / 0.6);
@@ -1582,7 +1689,7 @@ function drawMinimapScreen() {
   const mmR = 60;
   const mmD = mmR * 2;
   const mmCX = canvasW - mmR - 14;
-  const mmCY = mmR + 39;
+  const mmCY = mmR + 75;
 
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -1751,7 +1858,7 @@ function drawIntroPlayer() {
 // ========== MAIN GAME LOOP ==========
 let lastTime = 0;
 let lastUpdateTime = 0;
-const MOBILE_FPS = 30;
+const MOBILE_FPS = 60;
 function gameLoop(timestamp) {
   requestAnimationFrame(gameLoop);
   if (isMobile && (timestamp - lastUpdateTime) < 1000 / MOBILE_FPS) return;

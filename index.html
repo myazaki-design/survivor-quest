@@ -1059,7 +1059,6 @@ function setupInput() {
   }, { passive: false });
 
   zone.addEventListener('touchmove', (e) => {
-    tryUnlockAudio();
     e.preventDefault();
     for (const t of e.changedTouches) {
       if (t.identifier !== joystick.touchId) continue;

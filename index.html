@@ -256,6 +256,25 @@ function playSE(key, cooldown) {
   SE[key].play();
 }
 
+let audioUnlocked = false;
+function unlockAudioContext() {
+  if (audioUnlocked) return;
+  if (typeof Howler === 'undefined' || !Howler.ctx) return;
+  if (Howler.ctx.state === 'suspended') {
+    Howler.ctx.resume().then(() => {
+      audioUnlocked = true;
+      const silent = new Howl({
+        src: ['data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA=='],
+        volume: 0,
+        html5: false
+      });
+      silent.play();
+    }).catch(() => {});
+  } else {
+    audioUnlocked = true;
+  }
+}
+
 // ========== ASSET LOADER ==========
 const IMG = {};
 const ASSET_LIST = [
@@ -1135,8 +1154,8 @@ function setupInput() {
     }
   }
 
-  document.getElementById('start-btn').onclick = () => { playSE('click'); startGame(); };
-  document.getElementById('retry-btn').onclick = () => { playSE('click'); startGame(); };
+  document.getElementById('start-btn').onclick = () => { unlockAudioContext(); playSE('click'); startGame(); };
+  document.getElementById('retry-btn').onclick = () => { unlockAudioContext(); playSE('click'); startGame(); };
   document.getElementById('result-to-title-btn').onclick = () => {
     playSE('click');
     document.getElementById('result-screen').style.display = 'none';
@@ -1154,6 +1173,7 @@ function setupInput() {
     showTitleScreen();
   };
   document.getElementById('title-sound-btn').onclick = () => {
+    unlockAudioContext();
     soundOn = !soundOn;
     Howler.mute(!soundOn);
     document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';

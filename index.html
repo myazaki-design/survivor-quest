@@ -217,9 +217,8 @@ const CFG = {
   SPAWN_MARGIN: 80
 };
 
-// ========== SOUND SYSTEM ==========
+// ========== SOUND SYSTEM (Web Audio API) ==========
 let soundOn = true;
-const SE = {};
 const SE_LIST = [
   ['sword', 'assets/sword.mp3'],
   ['damage', 'assets/damage.mp3'],
@@ -229,63 +228,56 @@ const SE_LIST = [
   ['levelup', 'assets/levelup.wav']
 ];
 const seCooldowns = {};
-const DAMAGE_POOL_SIZE = 5;
-const damagePool = [];
-let damagePoolIndex = 0;
+let audioCtx = null;
+const audioBuffers = {};
 
-function loadSounds(onProgress) {
-  const promises = [];
-  for (const [key, src] of SE_LIST) {
-    if (key === 'damage') {
-      const damagePromises = [];
-      for (let i = 0; i < DAMAGE_POOL_SIZE; i++) {
-        damagePromises.push(new Promise((resolve) => {
-          const audio = new Audio(src);
-          audio.preload = 'auto';
-          audio.volume = 0.5;
-          damagePool.push(audio);
-          audio.addEventListener('canplaythrough', resolve, { once: true });
-          audio.addEventListener('error', resolve, { once: true });
-          audio.load();
-        }));
-      }
-      promises.push(Promise.all(damagePromises).then(() => { if (onProgress) onProgress(); }));
-      SE['damage'] = damagePool[0];
-    } else {
-      promises.push(new Promise((resolve) => {
-        const audio = new Audio(src);
-        audio.preload = 'auto';
-        audio.volume = 0.5;
-        SE[key] = audio;
-        const done = () => { if (onProgress) onProgress(); resolve(); };
-        audio.addEventListener('canplaythrough', done, { once: true });
-        audio.addEventListener('error', done, { once: true });
-        audio.load();
-      }));
+function initAudioContext() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+let audioResumed = false;
+function ensureAudioResumed() {
+  if (!audioCtx) initAudioContext();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (!audioResumed) {
+    audioResumed = true;
+    for (const [key, src] of SE_LIST) {
+      if (audioBuffers[key]) continue;
+      fetch(src).then(r => r.arrayBuffer())
+        .then(buf => audioCtx.decodeAudioData(buf))
+        .then(decoded => { audioBuffers[key] = decoded; })
+        .catch(() => {});
     }
   }
-  return Promise.all(promises);
+}
+
+function loadSounds(onProgress) {
+  initAudioContext();
+  return Promise.all(SE_LIST.map(([key, src]) =>
+    fetch(src)
+      .then(r => r.arrayBuffer())
+      .then(buf => audioCtx.decodeAudioData(buf))
+      .then(decoded => { audioBuffers[key] = decoded; })
+      .catch(() => { audioBuffers[key] = null; })
+      .finally(() => { if (onProgress) onProgress(); })
+  ));
 }
 
 function playSE(key, cooldown) {
-  if (!soundOn) return;
+  if (!soundOn || !audioCtx || !audioBuffers[key]) return;
   const now = performance.now();
   if (cooldown) {
     if (seCooldowns[key] && now - seCooldowns[key] < cooldown) return;
     seCooldowns[key] = now;
   }
-  if (key === 'damage' && damagePool.length > 0) {
-    const a = damagePool[damagePoolIndex % damagePool.length];
-    damagePoolIndex++;
-    a.currentTime = 0;
-    a.volume = 0.5;
-    a.play().catch(() => {});
-    return;
-  }
-  if (!SE[key]) return;
-  const s = SE[key].cloneNode();
-  s.volume = SE[key].volume;
-  s.play().catch(() => {});
+  const source = audioCtx.createBufferSource();
+  source.buffer = audioBuffers[key];
+  const gain = audioCtx.createGain();
+  gain.gain.value = 0.5;
+  source.connect(gain).connect(audioCtx.destination);
+  source.start(0);
 }
 
 // ========== ASSET LOADER ==========
@@ -1167,8 +1159,8 @@ function setupInput() {
     }
   }
 
-  document.getElementById('start-btn').onclick = () => { playSE('click'); startGame(); };
-  document.getElementById('retry-btn').onclick = () => { playSE('click'); startGame(); };
+  document.getElementById('start-btn').onclick = () => { ensureAudioResumed(); playSE('click'); startGame(); };
+  document.getElementById('retry-btn').onclick = () => { ensureAudioResumed(); playSE('click'); startGame(); };
   document.getElementById('result-to-title-btn').onclick = () => {
     playSE('click');
     document.getElementById('result-screen').style.display = 'none';
@@ -1186,6 +1178,7 @@ function setupInput() {
     showTitleScreen();
   };
   document.getElementById('title-sound-btn').onclick = () => {
+    ensureAudioResumed();
     soundOn = !soundOn;
     document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
     document.getElementById('btn-sound').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';

@@ -29,9 +29,9 @@ canvas{display:block;width:100%;height:100%}
 #pause-dialog h3{color:#ffcc00;font-size:24px;font-weight:900;margin:0 0 4px 0;letter-spacing:2px;text-shadow:0 0 20px rgba(255,204,0,0.4),-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
 .pause-btn-action{width:100%;padding:14px 0;font-size:17px;font-weight:700;color:#fff;border:none;border-radius:30px;cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent;transition:transform 0.15s,box-shadow 0.15s;letter-spacing:1px}
 .pause-btn-action:hover,.pause-btn-action:active{transform:scale(1.04)}
-#btn-resume{background:linear-gradient(135deg,#3498db,#2980b9);box-shadow:0 4px 16px rgba(52,152,219,0.4)}
-#btn-sound{background:linear-gradient(135deg,#6c5b7b,#4a3f5c);box-shadow:0 4px 16px rgba(108,91,123,0.4)}
-#btn-title{background:linear-gradient(135deg,#e8433e,#c0392b);box-shadow:0 4px 16px rgba(232,67,62,0.4)}
+#btn-resume{background:linear-gradient(135deg,#e8433e,#c0392b);box-shadow:0 4px 16px rgba(232,67,62,0.4)}
+#btn-sound{background:linear-gradient(135deg,#6c5b7b,#4a3f5c);box-shadow:0 4px 16px rgba(108,91,123,0.4);padding:10px 0;font-size:15px}
+#btn-title{background:linear-gradient(135deg,#6c5b7b,#4a3f5c);box-shadow:0 4px 16px rgba(108,91,123,0.4);padding:10px 0;font-size:15px}
 
 /* XP Bar (DOM) - Pixel style */
 #xp-bar-container{position:fixed;top:57px;left:16px;right:140px;z-index:10;display:none;pointer-events:none;flex-direction:row;align-items:center;gap:6px}
@@ -77,15 +77,17 @@ canvas{display:block;width:100%;height:100%}
 .skill-tag.upgrade{background:#6b4c1e;color:#fda}
 
 /* Title Screen */
-#title-screen{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a0f2e url(assets/title_bg.jpg) center/auto 100% no-repeat;overflow:hidden}
-#title-screen #start-btn,#title-screen #title-sound-btn{position:relative;z-index:1}
+#title-screen{position:fixed;inset:0;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a0f2e url(assets/title_bg.jpg) center/auto 100% no-repeat;overflow:hidden;opacity:0;transition:opacity 0.6s ease-out}
+#title-screen.show-bg{opacity:1}
+#title-screen #start-btn,#title-screen #title-sound-btn{position:relative;z-index:1;opacity:0;transform:translateY(20px);transition:opacity 0.6s ease-out,transform 0.6s ease-out}
+#title-screen.show-btns #start-btn{opacity:1;transform:translateY(0);animation:startBtnPulse 1.8s ease-in-out 0.8s infinite}
+#title-screen.show-btns #title-sound-btn{opacity:1;transform:translateY(0);transition-delay:0.3s}
 #title-screen #start-btn{margin-top:70vh}
-#start-btn{padding:16px 48px;font-size:22px;font-weight:700;color:#fff;background:linear-gradient(135deg,#e8433e,#c0392b);border:none;border-radius:30px;cursor:pointer;box-shadow:0 6px 20px rgba(232,67,62,0.4);transition:transform 0.15s;letter-spacing:1px;animation:btnPulse 1.5s ease-in-out infinite}
-#start-btn:hover,#start-btn:active{transform:scale(1.06)}
+#start-btn{padding:16px 48px;font-size:22px;font-weight:700;color:#fff;background:linear-gradient(135deg,#e8433e,#c0392b);border:none;border-radius:30px;cursor:pointer;box-shadow:0 6px 20px rgba(232,67,62,0.4);letter-spacing:1px}
+#start-btn:hover,#start-btn:active{transform:scale(1.06)!important}
 #title-sound-btn{margin-top:24px;padding:10px 32px;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,#6c5b7b,#4a3f5c);border:none;border-radius:24px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:transform 0.15s;-webkit-tap-highlight-color:transparent}
-#title-sound-btn:hover,#title-sound-btn:active{transform:scale(1.04)}
-@keyframes titlePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
-@keyframes btnPulse{0%,100%{box-shadow:0 6px 20px rgba(232,67,62,0.4)}50%{box-shadow:0 6px 30px rgba(232,67,62,0.7)}}
+#title-sound-btn:hover,#title-sound-btn:active{transform:scale(1.04)!important}
+@keyframes startBtnPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 
 /* Result Screen */
 #result-screen{position:fixed;inset:0;z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);color:#fff}
@@ -94,19 +96,34 @@ canvas{display:block;width:100%;height:100%}
 #result-screen.gameover h2{color:#e8433e}
 .result-stats{font-size:16px;line-height:2;text-align:center;margin-bottom:30px}
 .result-stats span{color:#ffcc00;font-weight:700}
-#retry-btn{padding:14px 44px;font-size:20px;font-weight:700;color:#fff;background:linear-gradient(135deg,#3498db,#2980b9);border:none;border-radius:30px;cursor:pointer;box-shadow:0 6px 20px rgba(52,152,219,0.4);transition:transform 0.15s}
+#retry-btn{padding:14px 44px;font-size:20px;font-weight:700;color:#fff;background:linear-gradient(135deg,#e8433e,#c0392b);border:none;border-radius:30px;cursor:pointer;box-shadow:0 6px 20px rgba(232,67,62,0.4);transition:transform 0.15s}
 #retry-btn:hover,#retry-btn:active{transform:scale(1.06)}
+#result-to-title-btn{margin-top:24px;padding:10px 36px;font-size:16px;font-weight:700;color:#fff;background:linear-gradient(135deg,#6c5b7b,#4a3f5c);border:none;border-radius:24px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:transform 0.15s;-webkit-tap-highlight-color:transparent}
+#result-to-title-btn:hover,#result-to-title-btn:active{transform:scale(1.04)}
 
 /* Debug: Max All Skills / Spawn All Enemies */
 #debug-max-btn{position:fixed;bottom:16px;right:16px;z-index:15;padding:8px 14px;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,0.6);border:2px solid rgba(255,200,0,0.6);border-radius:8px;cursor:pointer;display:none;pointer-events:auto;-webkit-tap-highlight-color:transparent}
 #debug-max-btn:hover,#debug-max-btn:active{background:rgba(255,200,0,0.25);border-color:#ffcc00}
 #debug-spawn-btn{position:fixed;bottom:16px;right:120px;z-index:15;padding:8px 14px;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,0.6);border:2px solid rgba(100,200,255,0.6);border-radius:8px;cursor:pointer;display:none;pointer-events:auto;-webkit-tap-highlight-color:transparent}
 #debug-spawn-btn:hover,#debug-spawn-btn:active{background:rgba(100,200,255,0.25);border-color:#64c8ff}
+
+/* Loading Screen */
+#loading-screen{position:fixed;inset:0;z-index:300;background:#1a0f2e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity 0.5s ease-out}
+#loading-screen.done{opacity:0;pointer-events:none}
+#loading-bar-outer{width:200px;height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden}
+#loading-bar-inner{height:100%;width:0%;background:linear-gradient(90deg,#e8433e,#ffcc00);border-radius:4px;transition:width 0.2s ease-out}
+#loading-text{color:rgba(255,255,255,0.5);font-size:12px;font-weight:600}
 </style>
 </head>
 <body>
 
 <canvas id="gameCanvas"></canvas>
+
+<!-- Loading Screen -->
+<div id="loading-screen">
+  <div id="loading-bar-outer"><div id="loading-bar-inner"></div></div>
+  <div id="loading-text">Loading...</div>
+</div>
 
 <!-- HUD -->
 <div id="hud">
@@ -169,17 +186,18 @@ canvas{display:block;width:100%;height:100%}
   <div id="skill-choices"></div>
 </div>
 
-<!-- Title -->
-<div id="title-screen">
-  <button id="start-btn">&#x2694;&#xFE0F; スタート &#x2694;&#xFE0F;</button>
-  <button id="title-sound-btn">🔊 サウンド: ON</button>
-</div>
-
 <!-- Result -->
 <div id="result-screen">
   <h2 id="result-title"></h2>
   <div class="result-stats" id="result-stats"></div>
-  <button id="retry-btn">リベンジ</button>
+  <button id="retry-btn">再スタート</button>
+  <button id="result-to-title-btn">タイトルに戻る</button>
+</div>
+
+<!-- Title -->
+<div id="title-screen">
+  <button id="start-btn">&#x2694;&#xFE0F; スタート &#x2694;&#xFE0F;</button>
+  <button id="title-sound-btn">🔊 サウンド: ON</button>
 </div>
 
 <script>
@@ -211,13 +229,17 @@ const SE_LIST = [
 ];
 const seCooldowns = {};
 
-function loadSounds() {
-  for (const [key, src] of SE_LIST) {
+function loadSounds(onProgress) {
+  return Promise.all(SE_LIST.map(([key, src]) => new Promise((resolve) => {
     const audio = new Audio(src);
     audio.preload = 'auto';
     audio.volume = 0.5;
     SE[key] = audio;
-  }
+    const done = () => { if (onProgress) onProgress(); resolve(); };
+    audio.addEventListener('canplaythrough', done, { once: true });
+    audio.addEventListener('error', done, { once: true });
+    audio.load();
+  })));
 }
 
 function playSE(key, cooldown) {
@@ -235,6 +257,7 @@ function playSE(key, cooldown) {
 // ========== ASSET LOADER ==========
 const IMG = {};
 const ASSET_LIST = [
+  ['title_bg', 'assets/title_bg.jpg'],
   ['player', 'assets/player.png'],
   ['slime_blue', 'assets/slime.png'],
   ['slime_green', 'assets/green_slime.png'],
@@ -255,11 +278,11 @@ const ASSET_LIST = [
   ['thunder2', 'assets/thunder2.png']
 ];
 
-function loadAssets() {
+function loadAssets(onProgress) {
   return Promise.all(ASSET_LIST.map(([key, src]) => new Promise((resolve) => {
     const img = new Image();
-    img.onload = () => { IMG[key] = img; resolve(); };
-    img.onerror = () => { IMG[key] = null; resolve(); };
+    img.onload = () => { IMG[key] = img; if (onProgress) onProgress(); resolve(); };
+    img.onerror = () => { IMG[key] = null; if (onProgress) onProgress(); resolve(); };
     img.src = src;
   })));
 }
@@ -1116,6 +1139,22 @@ function setupInput() {
 
   document.getElementById('start-btn').onclick = () => { playSE('click'); startGame(); };
   document.getElementById('retry-btn').onclick = () => { playSE('click'); startGame(); };
+  document.getElementById('result-to-title-btn').onclick = () => {
+    playSE('click');
+    document.getElementById('result-screen').style.display = 'none';
+    document.getElementById('hud').style.display = 'none';
+    document.getElementById('xp-bar-container').style.display = 'none';
+    document.getElementById('joystick-zone').style.display = 'none';
+    document.getElementById('hp-bar-container').style.display = 'none';
+    document.getElementById('weapon-slots').style.display = 'none';
+    document.getElementById('pause-btn').style.display = 'none';
+    document.getElementById('debug-max-btn').style.display = 'none';
+    document.getElementById('debug-spawn-btn').style.display = 'none';
+    document.getElementById('hp-low-overlay').style.display = 'none';
+    document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
+    state = 'title';
+    showTitleScreen();
+  };
   document.getElementById('title-sound-btn').onclick = () => {
     soundOn = !soundOn;
     document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
@@ -1170,8 +1209,8 @@ function setupInput() {
   document.getElementById('debug-max-btn').style.display = 'none';
   document.getElementById('debug-spawn-btn').style.display = 'none';
   document.getElementById('hp-low-overlay').style.display = 'none';
-  document.getElementById('title-screen').style.display = 'flex';
   document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
+  showTitleScreen();
   });
 }
 
@@ -1231,6 +1270,7 @@ function render() {
 
   ctx.setTransform(gameScale, 0, 0, gameScale, gameOffX, gameOffY);
   drawHUDCanvas();
+  drawMinimapScreen();
 }
 
 function drawMap() {
@@ -1554,12 +1594,16 @@ function drawDamageNums() {
 }
 
 function drawHUDCanvas() {
+}
+
+function drawMinimapScreen() {
   const mmR = 60;
   const mmD = mmR * 2;
-  const mmCX = CFG.VIEW_W - mmR - 14;
+  const mmCX = canvasW - mmR - 14;
   const mmCY = mmR + 39;
 
   ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.beginPath();
   ctx.arc(mmCX, mmCY, mmR, 0, Math.PI * 2);
   ctx.clip();
@@ -1584,6 +1628,8 @@ function drawHUDCanvas() {
   }
   ctx.restore();
 
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.strokeStyle = 'rgba(255,255,255,0.4)';
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -1594,6 +1640,7 @@ function drawHUDCanvas() {
   ctx.beginPath();
   ctx.arc(mmCX, mmCY, mmR + 2, 0, Math.PI * 2);
   ctx.stroke();
+  ctx.restore();
 }
 
 // ========== HUD DOM UPDATE ==========
@@ -1766,13 +1813,49 @@ function gameLoop(timestamp) {
   }
 }
 
+function showTitleScreen() {
+  const ts = document.getElementById('title-screen');
+  ts.style.display = 'flex';
+  ts.classList.remove('show-bg', 'show-btns');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => ts.classList.add('show-bg'));
+  });
+  setTimeout(() => ts.classList.add('show-btns'), 600);
+}
+
 // ========== INIT ==========
 async function init() {
   generateDecorations();
   setupInput();
-  loadSounds();
-  await loadAssets();
+
+  const totalItems = ASSET_LIST.length + SE_LIST.length;
+  let loaded = 0;
+  const barInner = document.getElementById('loading-bar-inner');
+  const loadingText = document.getElementById('loading-text');
+
+  function onProgress() {
+    loaded++;
+    const pct = Math.round((loaded / totalItems) * 100);
+    barInner.style.width = pct + '%';
+    loadingText.textContent = `Loading... ${pct}%`;
+  }
+
+  await Promise.all([
+    loadAssets(onProgress),
+    loadSounds(onProgress)
+  ]);
+
+  barInner.style.width = '100%';
+  loadingText.textContent = 'Loading... 100%';
+
+  await new Promise(r => setTimeout(r, 300));
+
+  const ls = document.getElementById('loading-screen');
+  ls.classList.add('done');
+  setTimeout(() => ls.style.display = 'none', 600);
+
   state = 'title';
+  showTitleScreen();
   lastTime = performance.now();
   requestAnimationFrame(gameLoop);
 }

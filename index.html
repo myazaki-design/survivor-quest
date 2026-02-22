@@ -576,7 +576,8 @@ function findNearestEnemies(x, y, n, maxDist) {
 
 // ========== ENEMY LOGIC ==========
 function spawnEnemy(type, ignoreMax = false) {
-  if (!ignoreMax && enemies.filter(e => e.active).length >= CFG.MAX_ENEMIES) return;
+  const maxEnemies = isMobile ? 50 : CFG.MAX_ENEMIES;
+  if (!ignoreMax && enemies.filter(e => e.active).length >= maxEnemies) return;
   const def = ENEMY_DEFS[type];
   if (!def) return;
   const side = randInt(0, 3);
@@ -610,11 +611,20 @@ function updateEnemies(dt) {
   let highestDmg = 0;
   let touching = false;
 
+  const UPDATE_MARGIN = 400;
   for (const e of enemies) {
     if (!e.active) continue;
     const a = angle(e.x, e.y, player.x, player.y);
     let mx = Math.cos(a) * e.speed * dt;
     let my = Math.sin(a) * e.speed * dt;
+    const isFar = e.x < camera.x - UPDATE_MARGIN || e.x > camera.x + CFG.VIEW_W + UPDATE_MARGIN ||
+      e.y < camera.y - UPDATE_MARGIN || e.y > camera.y + CFG.VIEW_H + UPDATE_MARGIN;
+    if (isFar) {
+      e.x += mx; e.y += my;
+      e.x = clamp(e.x, 10, CFG.MAP_W - 10);
+      e.y = clamp(e.y, 10, CFG.MAP_H - 10);
+      continue;
+    }
     if (e.zigzag) {
       e.zigTimer += dt;
       if (e.zigTimer > 0.3) { e.zigTimer = 0; e.zigDir *= -1; }

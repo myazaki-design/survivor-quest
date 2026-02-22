@@ -218,8 +218,9 @@ const CFG = {
   SPAWN_MARGIN: 80
 };
 
-// ========== SOUND SYSTEM (Audio Pool + Web Audio API fallback) ==========
+// ========== SOUND SYSTEM ==========
 let soundOn = true;
+const SE = {};
 const SE_LIST = [
   ['sword', 'assets/sword.mp3'],
   ['damage', 'assets/damage.mp3'],
@@ -229,82 +230,30 @@ const SE_LIST = [
   ['levelup', 'assets/levelup.wav']
 ];
 const seCooldowns = {};
-const SE_POOL_SIZE = { sword: 3, damage: 5, fire: 3, thunder: 2, click: 2, levelup: 1 };
-const sePools = {};
-const sePoolIdx = {};
-let useWebAudio = false;
-let audioCtx = null;
-const audioBuffers = {};
 
 function loadSounds(onProgress) {
   return Promise.all(SE_LIST.map(([key, src]) => new Promise((resolve) => {
-    const poolSize = SE_POOL_SIZE[key] || 2;
-    sePools[key] = [];
-    sePoolIdx[key] = 0;
-    let loaded = 0;
-    for (let i = 0; i < poolSize; i++) {
-      const audio = new Audio(src);
-      audio.preload = 'auto';
-      audio.volume = 0.5;
-      sePools[key].push(audio);
-      const done = () => { loaded++; if (loaded >= poolSize) { if (onProgress) onProgress(); resolve(); } };
-      audio.addEventListener('canplaythrough', done, { once: true });
-      audio.addEventListener('error', done, { once: true });
-      audio.load();
-    }
+    const audio = new Audio(src);
+    audio.preload = 'auto';
+    audio.volume = 0.5;
+    SE[key] = audio;
+    const done = () => { if (onProgress) onProgress(); resolve(); };
+    audio.addEventListener('canplaythrough', done, { once: true });
+    audio.addEventListener('error', done, { once: true });
+    audio.load();
   })));
 }
 
-function tryInitWebAudio() {
-  if (audioCtx) return;
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const promises = [];
-    for (const [key, src] of SE_LIST) {
-      promises.push(
-        fetch(src)
-          .then(r => r.arrayBuffer())
-          .then(buf => new Promise((resolve, reject) => {
-            audioCtx.decodeAudioData(buf, decoded => { audioBuffers[key] = decoded; resolve(); }, () => reject());
-          }))
-          .catch(() => {})
-      );
-    }
-    Promise.all(promises).then(() => {
-      let ok = 0;
-      for (const [key] of SE_LIST) { if (audioBuffers[key]) ok++; }
-      if (ok >= SE_LIST.length - 1) useWebAudio = true;
-    });
-  } catch (e) {}
-}
-
 function playSE(key, cooldown) {
-  if (!soundOn) return;
+  if (!soundOn || !SE[key]) return;
   const now = performance.now();
   if (cooldown) {
     if (seCooldowns[key] && now - seCooldowns[key] < cooldown) return;
     seCooldowns[key] = now;
   }
-  if (useWebAudio && audioCtx && audioBuffers[key]) {
-    try {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const source = audioCtx.createBufferSource();
-      source.buffer = audioBuffers[key];
-      const gain = audioCtx.createGain();
-      gain.gain.value = 0.5;
-      source.connect(gain).connect(audioCtx.destination);
-      source.start(0);
-      return;
-    } catch (e) {}
-  }
-  const pool = sePools[key];
-  if (!pool || pool.length === 0) return;
-  const a = pool[sePoolIdx[key] % pool.length];
-  sePoolIdx[key]++;
-  a.currentTime = 0;
-  a.volume = 0.5;
-  a.play().catch(() => {});
+  const s = SE[key].cloneNode();
+  s.volume = SE[key].volume;
+  s.play().catch(() => {});
 }
 
 // ========== ASSET LOADER ==========
@@ -716,7 +665,7 @@ function updateEnemies(dt) {
     shakeTimer = 0.15; shakeIntensity = 4;
     damageShakeTimer = 0.6;
     damageNums.push({ x: player.x, y: player.y - 20, val: Math.round(highestDmg), color: '#ff4444', timer: 0.8 });
-    playSE('damage', 300);
+    playSE('damage', 1000);
     if (player.hp <= 0) { player.hp = 0; gameOver(); }
   }
 }
@@ -726,7 +675,7 @@ function damageEnemy(e, dmg, fx, fy) {
   e.hp -= dmg;
   e.flashTimer = 0.2;
   damageNums.push({ x: e.x + rand(-10, 10), y: e.y - e.size, val: Math.round(dmg), color: '#ffff44', timer: 0.6 });
-  playSE('damage', 300);
+  playSE('damage', 1000);
   if (!e.knockbackResist) {
     const ka = angle(fx, fy, e.x, e.y);
     e.kbx = Math.cos(ka) * 160;
@@ -1186,10 +1135,9 @@ function setupInput() {
     }
   }
 
-  document.getElementById('start-btn').onclick = () => { tryInitWebAudio(); playSE('click'); startGame(); };
-  document.getElementById('retry-btn').onclick = () => { tryInitWebAudio(); playSE('click'); startGame(); };
+  document.getElementById('start-btn').onclick = () => { playSE('click'); startGame(); };
+  document.getElementById('retry-btn').onclick = () => { playSE('click'); startGame(); };
   document.getElementById('result-to-title-btn').onclick = () => {
-    tryInitWebAudio();
     playSE('click');
     document.getElementById('result-screen').style.display = 'none';
     document.getElementById('hud').style.display = 'none';
@@ -1206,7 +1154,6 @@ function setupInput() {
     showTitleScreen();
   };
   document.getElementById('title-sound-btn').onclick = () => {
-    tryInitWebAudio();
     soundOn = !soundOn;
     document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
     document.getElementById('btn-sound').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';

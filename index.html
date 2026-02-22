@@ -4,9 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,maximum-scale=1.0">
 <title>Survivor Quest</title>
+<link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;user-select:none;-webkit-user-select:none;font-family:'Segoe UI',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'RocknRoll One',sans-serif}
+html,body{width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;user-select:none;-webkit-user-select:none;font-family:'RocknRoll One',sans-serif}
 canvas{display:block;width:100%;height:100%}
 
 /* Joystick */
@@ -54,7 +55,7 @@ canvas{display:block;width:100%;height:100%}
 #weapon-slots{position:fixed;bottom:16px;left:20px;right:20px;z-index:10;display:none;gap:5px;flex-direction:row;justify-content:flex-start}
 #weapon-slots .slot{width:48px;height:56px;background:rgba(0,0,0,0.6);border:2px solid rgba(255,255,255,0.3);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:27px;outline:1px solid #000;gap:0}
 #weapon-slots .slot.active{border-color:#ffcc00;background:rgba(40,30,60,0.8)}
-#weapon-slots .slot .slot-lv{font-size:10px;font-weight:900;font-family:'Arial Black',sans-serif;color:#ffcc00;line-height:1;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
+#weapon-slots .slot .slot-lv{font-size:10px;font-weight:900;font-family:'RocknRoll One',sans-serif;color:#ffcc00;line-height:1;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
 #weapon-slots .slot .slot-lv.passive{color:#88aaff}
 
 /* Level Up Screen */
@@ -230,43 +231,38 @@ const SE_LIST = [
 const seCooldowns = {};
 let audioCtx = null;
 const audioBuffers = {};
+const audioRawBuffers = {};
 
-function initAudioContext() {
-  if (audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+function loadSounds(onProgress) {
+  return Promise.all(SE_LIST.map(([key, src]) =>
+    fetch(src)
+      .then(r => r.arrayBuffer())
+      .then(buf => { audioRawBuffers[key] = buf; })
+      .catch(() => { audioRawBuffers[key] = null; })
+      .finally(() => { if (onProgress) onProgress(); })
+  ));
 }
 
-let audioResumed = false;
+let audioInitDone = false;
 function ensureAudioResumed() {
-  if (!audioCtx) initAudioContext();
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
   if (audioCtx.state === 'suspended') audioCtx.resume();
-  if (!audioResumed) {
-    audioResumed = true;
-    for (const [key, src] of SE_LIST) {
-      if (audioBuffers[key]) continue;
-      fetch(src).then(r => r.arrayBuffer())
-        .then(buf => audioCtx.decodeAudioData(buf))
+  if (!audioInitDone) {
+    audioInitDone = true;
+    for (const [key] of SE_LIST) {
+      if (audioBuffers[key] || !audioRawBuffers[key]) continue;
+      audioCtx.decodeAudioData(audioRawBuffers[key].slice(0))
         .then(decoded => { audioBuffers[key] = decoded; })
         .catch(() => {});
     }
   }
 }
 
-function loadSounds(onProgress) {
-  initAudioContext();
-  return Promise.all(SE_LIST.map(([key, src]) =>
-    fetch(src)
-      .then(r => r.arrayBuffer())
-      .then(buf => audioCtx.decodeAudioData(buf))
-      .then(decoded => { audioBuffers[key] = decoded; })
-      .catch(() => { audioBuffers[key] = null; })
-      .finally(() => { if (onProgress) onProgress(); })
-  ));
-}
-
 function playSE(key, cooldown) {
   if (!soundOn || !audioCtx || !audioBuffers[key]) return;
+  if (audioCtx.state === 'suspended') return;
   const now = performance.now();
   if (cooldown) {
     if (seCooldowns[key] && now - seCooldowns[key] < cooldown) return;
@@ -982,8 +978,8 @@ function startGame() {
   document.getElementById('pause-overlay').style.display = 'none';
   document.getElementById('hp-bar-container').style.display = 'flex';
   document.getElementById('hp-low-overlay').style.display = 'none';
-  document.getElementById('debug-max-btn').style.display = 'block';
-  document.getElementById('debug-spawn-btn').style.display = 'block';
+  // document.getElementById('debug-max-btn').style.display = 'block';
+  // document.getElementById('debug-spawn-btn').style.display = 'block';
 
   gameTime = 0; kills = 0; totalXP = 0; levelupPending = false;
   shakeTimer = 0; spawnTimer = 0; bossSpawned = {}; statMul = 1; damageShakeTimer = 0;
@@ -1664,7 +1660,7 @@ function drawDamageNums() {
   for (const d of damageNums) {
     const alpha = Math.max(0, d.timer / 0.6);
     ctx.globalAlpha = alpha;
-    ctx.font = '900 17px sans-serif';
+    ctx.font = '900 17px "RocknRoll One", sans-serif';
     ctx.textAlign = 'center';
     ctx.lineWidth = 3;
     ctx.strokeStyle = '#000';

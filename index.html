@@ -256,6 +256,20 @@ function playSE(key, cooldown) {
   s.play().catch(() => {});
 }
 
+let lastUnlockTime = 0;
+const UNLOCK_INTERVAL = 2000;
+function tryUnlockAudio() {
+  if (state !== 'playing') return;
+  const now = performance.now();
+  if (now - lastUnlockTime < UNLOCK_INTERVAL) return;
+  lastUnlockTime = now;
+  if (soundOn && SE['click']) {
+    const s = SE['click'].cloneNode();
+    s.volume = 0.01;
+    s.play().catch(() => {});
+  }
+}
+
 // ========== ASSET LOADER ==========
 const IMG = {};
 const ASSET_LIST = [
@@ -1027,6 +1041,7 @@ function setupInput() {
   const thumb = document.getElementById('joystick-thumb');
 
   zone.addEventListener('touchstart', (e) => {
+    tryUnlockAudio();
     if (joystick.active) return;
     e.preventDefault();
     const t = e.changedTouches[0];
@@ -1045,6 +1060,7 @@ function setupInput() {
   }, { passive: false });
 
   zone.addEventListener('touchmove', (e) => {
+    tryUnlockAudio();
     e.preventDefault();
     for (const t of e.changedTouches) {
       if (t.identifier !== joystick.touchId) continue;
@@ -1081,6 +1097,7 @@ function setupInput() {
   // Mouse drag support for desktop testing
   let mouseDown = false;
   zone.addEventListener('mousedown', (e) => {
+    tryUnlockAudio();
     mouseDown = true;
     joystick.active = true;
     joystick.baseX = e.clientX;

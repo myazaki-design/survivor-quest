@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,maximum-scale=1.0">
 <title>Survivor Quest</title>
 <link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'RocknRoll One',sans-serif}
 html,body{width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;user-select:none;-webkit-user-select:none;font-family:'RocknRoll One',sans-serif}
@@ -218,7 +219,7 @@ const CFG = {
   SPAWN_MARGIN: 80
 };
 
-// ========== SOUND SYSTEM ==========
+// ========== SOUND SYSTEM (Howler.js) ==========
 let soundOn = true;
 const SE = {};
 const SE_LIST = [
@@ -233,14 +234,14 @@ const seCooldowns = {};
 
 function loadSounds(onProgress) {
   return Promise.all(SE_LIST.map(([key, src]) => new Promise((resolve) => {
-    const audio = new Audio(src);
-    audio.preload = 'auto';
-    audio.volume = 0.5;
-    SE[key] = audio;
-    const done = () => { if (onProgress) onProgress(); resolve(); };
-    audio.addEventListener('canplaythrough', done, { once: true });
-    audio.addEventListener('error', done, { once: true });
-    audio.load();
+    SE[key] = new Howl({
+      src: [src],
+      volume: 0.5,
+      preload: true,
+      pool: 8,
+      onload: () => { if (onProgress) onProgress(); resolve(); },
+      onloaderror: () => { if (onProgress) onProgress(); resolve(); }
+    });
   })));
 }
 
@@ -251,9 +252,7 @@ function playSE(key, cooldown) {
     if (seCooldowns[key] && now - seCooldowns[key] < cooldown) return;
     seCooldowns[key] = now;
   }
-  const s = SE[key].cloneNode();
-  s.volume = SE[key].volume;
-  s.play().catch(() => {});
+  SE[key].play();
 }
 
 // ========== ASSET LOADER ==========
@@ -1155,6 +1154,7 @@ function setupInput() {
   };
   document.getElementById('title-sound-btn').onclick = () => {
     soundOn = !soundOn;
+    Howler.mute(!soundOn);
     document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
     document.getElementById('btn-sound').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
     playSE('click');
@@ -1190,6 +1190,7 @@ function setupInput() {
 
   document.getElementById('btn-sound').addEventListener('click', () => {
     soundOn = !soundOn;
+    Howler.mute(!soundOn);
     document.getElementById('btn-sound').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
     playSE('click');
   });

@@ -232,6 +232,7 @@ const seCooldowns = {};
 let audioCtx = null;
 const audioBuffers = {};
 const audioRawBuffers = {};
+let audioInitDone = false;
 
 function loadSounds(onProgress) {
   return Promise.all(SE_LIST.map(([key, src]) =>
@@ -243,20 +244,26 @@ function loadSounds(onProgress) {
   ));
 }
 
-let audioInitDone = false;
-function ensureAudioResumed() {
+async function ensureAudioResumed() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-  if (audioCtx.state === 'suspended') audioCtx.resume();
+  if (audioCtx.state === 'suspended') {
+    await audioCtx.resume();
+  }
   if (!audioInitDone) {
     audioInitDone = true;
+    const promises = [];
     for (const [key] of SE_LIST) {
       if (audioBuffers[key] || !audioRawBuffers[key]) continue;
-      audioCtx.decodeAudioData(audioRawBuffers[key].slice(0))
-        .then(decoded => { audioBuffers[key] = decoded; })
-        .catch(() => {});
+      const rawCopy = audioRawBuffers[key].slice(0);
+      promises.push(
+        audioCtx.decodeAudioData(rawCopy)
+          .then(decoded => { audioBuffers[key] = decoded; })
+          .catch(() => {})
+      );
     }
+    await Promise.all(promises);
   }
 }
 
@@ -268,12 +275,14 @@ function playSE(key, cooldown) {
     if (seCooldowns[key] && now - seCooldowns[key] < cooldown) return;
     seCooldowns[key] = now;
   }
-  const source = audioCtx.createBufferSource();
-  source.buffer = audioBuffers[key];
-  const gain = audioCtx.createGain();
-  gain.gain.value = 0.5;
-  source.connect(gain).connect(audioCtx.destination);
-  source.start(0);
+  try {
+    const source = audioCtx.createBufferSource();
+    source.buffer = audioBuffers[key];
+    const gain = audioCtx.createGain();
+    gain.gain.value = 0.5;
+    source.connect(gain).connect(audioCtx.destination);
+    source.start(0);
+  } catch (e) {}
 }
 
 // ========== ASSET LOADER ==========
@@ -1155,9 +1164,10 @@ function setupInput() {
     }
   }
 
-  document.getElementById('start-btn').onclick = () => { ensureAudioResumed(); playSE('click'); startGame(); };
-  document.getElementById('retry-btn').onclick = () => { ensureAudioResumed(); playSE('click'); startGame(); };
-  document.getElementById('result-to-title-btn').onclick = () => {
+  document.getElementById('start-btn').onclick = async () => { await ensureAudioResumed(); playSE('click'); startGame(); };
+  document.getElementById('retry-btn').onclick = async () => { await ensureAudioResumed(); playSE('click'); startGame(); };
+  document.getElementById('result-to-title-btn').onclick = async () => {
+    await ensureAudioResumed();
     playSE('click');
     document.getElementById('result-screen').style.display = 'none';
     document.getElementById('hud').style.display = 'none';
@@ -1173,8 +1183,8 @@ function setupInput() {
     state = 'title';
     showTitleScreen();
   };
-  document.getElementById('title-sound-btn').onclick = () => {
-    ensureAudioResumed();
+  document.getElementById('title-sound-btn').onclick = async () => {
+    await ensureAudioResumed();
     soundOn = !soundOn;
     document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
     document.getElementById('btn-sound').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';

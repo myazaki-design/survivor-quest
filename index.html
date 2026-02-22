@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,maximum-scale=1.0">
 <title>Survivor Quest</title>
 <link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'RocknRoll One',sans-serif}
 html,body{width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;user-select:none;-webkit-user-select:none;font-family:'RocknRoll One',sans-serif}
@@ -219,7 +218,7 @@ const CFG = {
   SPAWN_MARGIN: 80
 };
 
-// ========== SOUND SYSTEM (Howler.js) ==========
+// ========== SOUND SYSTEM ==========
 let soundOn = true;
 const SE = {};
 const SE_LIST = [
@@ -234,15 +233,14 @@ const seCooldowns = {};
 
 function loadSounds(onProgress) {
   return Promise.all(SE_LIST.map(([key, src]) => new Promise((resolve) => {
-    SE[key] = new Howl({
-      src: [src],
-      volume: 0.5,
-      preload: true,
-      pool: 8,
-      html5: false, // Web Audio APIを強制する
-      onload: () => { if (onProgress) onProgress(); resolve(); },
-      onloaderror: () => { if (onProgress) onProgress(); resolve(); }
-    });
+    const audio = new Audio(src);
+    audio.preload = 'auto';
+    audio.volume = 0.5;
+    SE[key] = audio;
+    const done = () => { if (onProgress) onProgress(); resolve(); };
+    audio.addEventListener('canplaythrough', done, { once: true });
+    audio.addEventListener('error', done, { once: true });
+    audio.load();
   })));
 }
 
@@ -253,59 +251,37 @@ function playSE(key, cooldown) {
     if (seCooldowns[key] && now - seCooldowns[key] < cooldown) return;
     seCooldowns[key] = now;
   }
-  SE[key].play();
-}
-
-let audioUnlocked = false;
-function unlockAudioContext() {
-  if (audioUnlocked) return;
-  if (typeof Howler === 'undefined' || !Howler.ctx) return;
-  if (Howler.ctx.state === 'suspended') {
-    Howler.ctx.resume().then(() => {
-      audioUnlocked = true;
-      const silent = new Howl({
-        src: ['data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA=='],
-        volume: 0,
-        html5: false
-      });
-      silent.play();
-    }).catch(() => {});
-  } else {
-    audioUnlocked = true;
-  }
+  const s = SE[key].cloneNode();
+  s.volume = SE[key].volume;
+  s.play().catch(() => {});
 }
 
 // ========== ASSET LOADER ==========
 const IMG = {};
 const ASSET_LIST = [
   ['title_bg', 'assets/title_bg.jpg'],
-  ['player', 'assets/player.png'],
-  ['slime_blue', 'assets/slime.png'],
-  ['slime_green', 'assets/green_slime.png'],
-  ['bat', 'assets/bat.png'],
-  ['golem', 'assets/golem.png'],
-  ['boss', 'assets/boss_slime.png'],
-  ['sword', 'assets/sword.png'],
-  ['player_front', 'assets/player2.png'],
-  ['crystal', 'assets/crystal.png'],
-  ['fire1', 'assets/fire1.png'],
-  ['fire2', 'assets/fire2.png'],
-  ['fire3', 'assets/fire3.png'],
-  ['storm1', 'assets/storm1.png'],
-  ['storm2', 'assets/storm2.png'],
-  ['storm3', 'assets/storm3.png'],
-  ['arrow_img', 'assets/arrow.png'],
-  ['thunder1', 'assets/thunder1.png'],
-  ['thunder2', 'assets/thunder2.png']
+  ['chara_atlas', 'assets/chara.png'],
+  ['effect_atlas', 'assets/effect.png'],
 ];
 
+let EFFECT_ATLAS_DATA = null;
+let CHARA_ATLAS_DATA = null;
+const CHARA_IMG_KEYS = { slime_blue: 'slime.png', slime_green: 'green_slime.png', bat: 'bat.png', golem: 'golem.png', boss: 'boss_slime.png' };
+
 function loadAssets(onProgress) {
-  return Promise.all(ASSET_LIST.map(([key, src]) => new Promise((resolve) => {
+  const imgPromises = ASSET_LIST.map(([key, src]) => new Promise((resolve) => {
     const img = new Image();
     img.onload = () => { IMG[key] = img; if (onProgress) onProgress(); resolve(); };
     img.onerror = () => { IMG[key] = null; if (onProgress) onProgress(); resolve(); };
     img.src = src;
-  })));
+  }));
+  const effectJsonPromise = fetch('assets/effect.json').then(r => r.json()).then(data => {
+    EFFECT_ATLAS_DATA = data;
+  }).catch(() => {});
+  const charaJsonPromise = fetch('assets/chara.json').then(r => r.json()).then(data => {
+    CHARA_ATLAS_DATA = data;
+  }).catch(() => {});
+  return Promise.all([...imgPromises, effectJsonPromise, charaJsonPromise]);
 }
 
 // ========== UTILITIES ==========
@@ -1154,8 +1130,8 @@ function setupInput() {
     }
   }
 
-  document.getElementById('start-btn').onclick = () => { unlockAudioContext(); playSE('click'); startGame(); };
-  document.getElementById('retry-btn').onclick = () => { unlockAudioContext(); playSE('click'); startGame(); };
+  document.getElementById('start-btn').onclick = () => { playSE('click'); startGame(); };
+  document.getElementById('retry-btn').onclick = () => { playSE('click'); startGame(); };
   document.getElementById('result-to-title-btn').onclick = () => {
     playSE('click');
     document.getElementById('result-screen').style.display = 'none';
@@ -1173,9 +1149,7 @@ function setupInput() {
     showTitleScreen();
   };
   document.getElementById('title-sound-btn').onclick = () => {
-    unlockAudioContext();
     soundOn = !soundOn;
-    Howler.mute(!soundOn);
     document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
     document.getElementById('btn-sound').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
     playSE('click');
@@ -1211,7 +1185,6 @@ function setupInput() {
 
   document.getElementById('btn-sound').addEventListener('click', () => {
     soundOn = !soundOn;
-    Howler.mute(!soundOn);
     document.getElementById('btn-sound').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
     playSE('click');
   });
@@ -1334,7 +1307,9 @@ function drawPlayer() {
   if (player.invTimer > 0 && Math.floor(player.invTimer * 20) % 2 === 0) { ctx.globalAlpha = 0.4; }
 
   const usePlayer2 = player.facing.y >= 0;
-  const useImg = usePlayer2 && IMG.player_front ? IMG.player_front : IMG.player;
+  const playerKey = usePlayer2 ? 'player2.png' : 'player.png';
+  const playerFrame = CHARA_ATLAS_DATA && CHARA_ATLAS_DATA.frames[playerKey];
+  const charaAtlas = IMG.chara_atlas;
   const flipX = player.facing.x < -0.1;
 
   const breathP = 1 + Math.sin(performance.now() * 0.004) * 0.02;
@@ -1343,8 +1318,9 @@ function drawPlayer() {
   ctx.translate(px, footY);
   ctx.scale(flipX ? -breathP : breathP, breathP);
   ctx.translate(-px, -footY);
-  if (useImg) {
-    ctx.drawImage(useImg, px - PW / 2, py - PH / 2, PW, PH);
+  if (charaAtlas && playerFrame) {
+    const f = playerFrame.frame;
+    ctx.drawImage(charaAtlas, f.x, f.y, f.w, f.h, px - PW / 2, py - PH / 2, PW, PH);
   } else {
     ctx.fillStyle = '#4488ff';
     ctx.fillRect(px - PW / 4, py - PH / 4, PW / 2, PH / 2);
@@ -1376,19 +1352,22 @@ function drawEnemies() {
 
     ctx.save();
     const def = ENEMY_DEFS[e.type];
-    const img = IMG[def.img];
+    const charaKey = CHARA_IMG_KEYS[def.img];
+    const frameData = CHARA_ATLAS_DATA && charaKey && CHARA_ATLAS_DATA.frames[charaKey];
+    const charaAtlasImg = IMG.chara_atlas;
     const breathE = 1 + Math.sin(performance.now() * 0.005 + e.x * 0.1) * 0.03;
     const eFoot = e.y + jy + e.h / 2;
     ctx.translate(e.x, eFoot);
     ctx.scale(breathE, breathE);
     ctx.translate(-e.x, -eFoot);
-    if (img) {
+    if (charaAtlasImg && frameData) {
       if (e.flashTimer > 0) {
         const glow = e.flashTimer / 0.2;
         if (isMobile) ctx.globalAlpha = 0.5 + glow * 0.5;
         else ctx.filter = `brightness(${1 + glow * 0.6}) saturate(${1 + glow * 0.6}) hue-rotate(${-25 * glow}deg)`;
       }
-      ctx.drawImage(img, e.x - e.w / 2, e.y + jy - e.h / 2, e.w, e.h);
+      const f = frameData.frame;
+      ctx.drawImage(charaAtlasImg, f.x, f.y, f.w, f.h, e.x - e.w / 2, e.y + jy - e.h / 2, e.w, e.h);
       if (e.flashTimer > 0) { ctx.filter = 'none'; ctx.globalAlpha = 1; }
     } else {
       ctx.fillStyle = '#ff4466';
@@ -1442,19 +1421,22 @@ function drawBoss() {
 
     ctx.save();
     const def = ENEMY_DEFS[e.type];
-    const img = IMG[def.img];
+    const charaKey = CHARA_IMG_KEYS[def.img];
+    const frameData = CHARA_ATLAS_DATA && charaKey && CHARA_ATLAS_DATA.frames[charaKey];
+    const charaAtlasImg = IMG.chara_atlas;
     const breathE = 1 + Math.sin(performance.now() * 0.005 + e.x * 0.1) * 0.03;
     const eFoot = e.y + jy + e.h / 2;
     ctx.translate(e.x, eFoot);
     ctx.scale(breathE, breathE);
     ctx.translate(-e.x, -eFoot);
-    if (img) {
+    if (charaAtlasImg && frameData) {
       if (e.flashTimer > 0) {
         const glow = e.flashTimer / 0.2;
         if (isMobile) ctx.globalAlpha = 0.5 + glow * 0.5;
         else ctx.filter = `brightness(${1 + glow * 0.6}) saturate(${1 + glow * 0.6}) hue-rotate(${-25 * glow}deg)`;
       }
-      ctx.drawImage(img, e.x - e.w / 2, e.y + jy - e.h / 2, e.w, e.h);
+      const f = frameData.frame;
+      ctx.drawImage(charaAtlasImg, f.x, f.y, f.w, f.h, e.x - e.w / 2, e.y + jy - e.h / 2, e.w, e.h);
       if (e.flashTimer > 0) { ctx.filter = 'none'; ctx.globalAlpha = 1; }
     } else {
       ctx.fillStyle = '#ff4466';
@@ -1488,9 +1470,12 @@ function drawBoss() {
 function drawXPGems() {
   for (const g of xpGems) {
     if (g.x < camera.x - 10 || g.x > camera.x + CFG.VIEW_W + 10 || g.y < camera.y - 10 || g.y > camera.y + CFG.VIEW_H + 10) continue;
-    if (IMG.crystal) {
+    const crystalFrame = CHARA_ATLAS_DATA && CHARA_ATLAS_DATA.frames['crystal.png'];
+    const charaAtlasForCrystal = IMG.chara_atlas;
+    if (charaAtlasForCrystal && crystalFrame) {
       const cs = g.size * 3;
-      ctx.drawImage(IMG.crystal, g.x - cs / 2, g.y - cs / 2, cs, cs);
+      const f = crystalFrame.frame;
+      ctx.drawImage(charaAtlasForCrystal, f.x, f.y, f.w, f.h, g.x - cs / 2, g.y - cs / 2, cs, cs);
     } else {
       ctx.fillStyle = '#44ff88';
       ctx.save();
@@ -1502,21 +1487,23 @@ function drawXPGems() {
   }
 }
 
-const FIRE_FRAMES = ['fire1', 'fire2', 'fire3'];
+const FIRE_FRAME_KEYS = ['fire1.png', 'fire2.png', 'fire3.png'];
 const FIRE_FRAME_MS = 90;
 
 function drawProjectiles() {
   for (const p of projectiles) {
     if (p.type === 'fireball') {
       const frameIdx = Math.floor((performance.now() / FIRE_FRAME_MS) % 3);
-      const fireImg = IMG[FIRE_FRAMES[frameIdx]];
-      if (fireImg) {
+      const effectAtlas = IMG.effect_atlas;
+      const frameData = EFFECT_ATLAS_DATA && EFFECT_ATLAS_DATA.frames[FIRE_FRAME_KEYS[frameIdx]];
+      if (effectAtlas && frameData) {
         const rot = Math.atan2(p.vy, p.vx) + Math.PI;
         const fs = p.size * 4;
+        const f = frameData.frame;
         ctx.save();
         ctx.translate(p.x, p.y);
         ctx.rotate(rot);
-        ctx.drawImage(fireImg, -fs / 2, -fs / 2, fs, fs);
+        ctx.drawImage(effectAtlas, f.x, f.y, f.w, f.h, -fs / 2, -fs / 2, fs, fs);
         ctx.restore();
       } else {
         ctx.fillStyle = '#ff6622';
@@ -1563,10 +1550,13 @@ function drawEffectsFront() {
     ctx.closePath();
     ctx.fill();
 
-    if (IMG.sword) {
+    const swordFrame = CHARA_ATLAS_DATA && CHARA_ATLAS_DATA.frames['sword.png'];
+    const charaAtlasForSword = IMG.chara_atlas;
+    if (charaAtlasForSword && swordFrame) {
       ctx.save();
       ctx.rotate(swingAngle);
-      ctx.drawImage(IMG.sword, 10, -20, ef.range * 0.85, 40);
+      const f = swordFrame.frame;
+      ctx.drawImage(charaAtlasForSword, f.x, f.y, f.w, f.h, 10, -20, ef.range * 0.85, 40);
       ctx.restore();
     } else {
       ctx.strokeStyle = `rgba(200,230,255,${alpha * 0.8})`;
@@ -1586,14 +1576,15 @@ function drawLightning() {
       const alpha = Math.max(0, ef.timer / ef.maxTime);
       const prog = 1 - ef.timer / ef.maxTime;
       const ay = ef.y + (ef.ty - ef.y + 120) * prog;
-      if (IMG.arrow_img) {
+      const arrowData = EFFECT_ATLAS_DATA && EFFECT_ATLAS_DATA.frames['arrow.png'];
+      const effectAtlas = IMG.effect_atlas;
+      if (effectAtlas && arrowData) {
         ctx.save();
         ctx.globalAlpha = alpha;
-        const img = IMG.arrow_img;
-        const nw = img.naturalWidth || 67, nh = img.naturalHeight || 284;
-        const scale = 60 / nh;
-        const aw = nw * scale, ah = nh * scale;
-        ctx.drawImage(IMG.arrow_img, ef.x - aw / 2, ay - ah / 2, aw, ah);
+        const f = arrowData.frame;
+        const scale = 60 / f.h;
+        const aw = f.w * scale, ah = f.h * scale;
+        ctx.drawImage(effectAtlas, f.x, f.y, f.w, f.h, ef.x - aw / 2, ay - ah / 2, aw, ah);
         ctx.restore();
       } else {
         ctx.strokeStyle = `rgba(200,180,120,${alpha})`;
@@ -1608,11 +1599,13 @@ function drawLightning() {
     ctx.save();
     const lightningAlpha = ef.timer > 0.2 ? 1 : ef.timer / 0.2;
     ctx.globalAlpha = lightningAlpha;
-    const THUNDER_FRAMES = ['thunder1', 'thunder2'];
-    const thunderImg = IMG[THUNDER_FRAMES[Math.floor((ef.maxTime - ef.timer) / 0.03) % 2]];
-    if (thunderImg) {
+    const THUNDER_FRAME_KEYS = ['thunder1.png', 'thunder2.png'];
+    const thunderFrameData = EFFECT_ATLAS_DATA && EFFECT_ATLAS_DATA.frames[THUNDER_FRAME_KEYS[Math.floor((ef.maxTime - ef.timer) / 0.03) % 2]];
+    const effectAtlasForThunder = IMG.effect_atlas;
+    if (effectAtlasForThunder && thunderFrameData) {
       const tw = 60, th = 240;
-      ctx.drawImage(thunderImg, ef.x - tw / 2, ef.y - th + 20, tw, th);
+      const tf = thunderFrameData.frame;
+      ctx.drawImage(effectAtlasForThunder, tf.x, tf.y, tf.w, tf.h, ef.x - tw / 2, ef.y - th + 20, tw, th);
     } else {
       ctx.strokeStyle = `rgba(180,200,255,${lightningAlpha})`;
       ctx.lineWidth = 4;
@@ -1634,7 +1627,7 @@ function drawLightning() {
   }
 
   // Whirlwind orbs (storm)
-  const STORM_FRAMES = ['storm1', 'storm2', 'storm3'];
+  const STORM_FRAME_KEYS = ['storm1.png', 'storm2.png', 'storm3.png'];
   const STORM_FRAME_MS = 90;
   for (const w of player.weapons) {
     if (w.id !== 'whirlwind') continue;
@@ -1645,10 +1638,12 @@ function drawLightning() {
       const ox = player.x + Math.cos(a) * radius;
       const oy = player.y + Math.sin(a) * radius;
       const sfi = Math.floor((performance.now() / STORM_FRAME_MS + i * 0.5) % 3);
-      const stormImg = IMG[STORM_FRAMES[sfi]];
-      if (stormImg) {
+      const stormFrameData = EFFECT_ATLAS_DATA && EFFECT_ATLAS_DATA.frames[STORM_FRAME_KEYS[sfi]];
+      const effectAtlasForStorm = IMG.effect_atlas;
+      if (effectAtlasForStorm && stormFrameData) {
         const ss = (44 + w.level * 3) * 2;
-        ctx.drawImage(stormImg, ox - ss / 2, oy - ss / 2, ss, ss);
+        const sf = stormFrameData.frame;
+        ctx.drawImage(effectAtlasForStorm, sf.x, sf.y, sf.w, sf.h, ox - ss / 2, oy - ss / 2, ss, ss);
       } else {
         ctx.fillStyle = 'rgba(150,255,200,0.5)';
         ctx.beginPath(); ctx.arc(ox, oy, 18 + w.level * 1.5, 0, Math.PI * 2); ctx.fill();
@@ -1828,7 +1823,9 @@ function drawIntroPlayer() {
 
   ctx.save();
   ctx.globalAlpha = fadeAlpha;
-  const img = IMG.player_front || IMG.player;
+  const introPlayerKey = 'player2.png';
+  const introPlayerFrame = CHARA_ATLAS_DATA && CHARA_ATLAS_DATA.frames[introPlayerKey];
+  const charaAtlasForIntro = IMG.chara_atlas;
   const footY = py + introOffY + PH / 2;
   const shakeX = introTimer > 0.8 ? Math.sin(performance.now() * 0.05) * 1 : 0;
   const shakeRot = introTimer > 0.8 ? Math.sin(performance.now() * 0.07) * 0.015 : 0;
@@ -1839,8 +1836,9 @@ function drawIntroPlayer() {
   ctx.scale(scX, 1);
   ctx.translate(-px, -footY);
 
-  if (img) {
-    ctx.drawImage(img, px - PW / 2, py + introOffY - PH / 2, PW, PH);
+  if (charaAtlasForIntro && introPlayerFrame) {
+    const f = introPlayerFrame.frame;
+    ctx.drawImage(charaAtlasForIntro, f.x, f.y, f.w, f.h, px - PW / 2, py + introOffY - PH / 2, PW, PH);
   }
   ctx.restore();
 }

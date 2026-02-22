@@ -1,0 +1,84 @@
+{"frames": {
+
+"arrow.png":
+{
+	"frame": {"x":720,"y":249,"w":67,"h":284},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":67,"h":284},
+	"sourceSize": {"w":67,"h":284}
+},
+"fire1.png":
+{
+	"frame": {"x":0,"y":0,"w":128,"h":128},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
+	"sourceSize": {"w":128,"h":128}
+},
+"fire2.png":
+{
+	"frame": {"x":128,"y":0,"w":128,"h":128},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
+	"sourceSize": {"w":128,"h":128}
+},
+"fire3.png":
+{
+	"frame": {"x":256,"y":0,"w":128,"h":128},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
+	"sourceSize": {"w":128,"h":128}
+},
+"storm1.png":
+{
+	"frame": {"x":384,"y":0,"w":272,"h":249},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":272,"h":249},
+	"sourceSize": {"w":272,"h":249}
+},
+"storm2.png":
+{
+	"frame": {"x":0,"y":249,"w":272,"h":249},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":272,"h":249},
+	"sourceSize": {"w":272,"h":249}
+},
+"storm3.png":
+{
+	"frame": {"x":272,"y":249,"w":272,"h":249},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":272,"h":249},
+	"sourceSize": {"w":272,"h":249}
+},
+"thunder1.png":
+{
+	"frame": {"x":544,"y":249,"w":88,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":88,"h":256},
+	"sourceSize": {"w":88,"h":256}
+},
+"thunder2.png":
+{
+	"frame": {"x":632,"y":249,"w":88,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":88,"h":256},
+	"sourceSize": {"w":88,"h":256}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "effect.png",
+	"format": "RGBA8888",
+	"size": {"w":787,"h":533},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:b9c202e08987d543f41952e14011a543:cff681bab9b3b67906aef72e23752dae:b60d9131f70683876e2c96e2120f0b99$"
+}
+}

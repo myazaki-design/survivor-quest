@@ -1,0 +1,84 @@
+{"frames": {
+
+"bat.png":
+{
+	"frame": {"x":275,"y":0,"w":256,"h":140},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":140},
+	"sourceSize": {"w":256,"h":140}
+},
+"boss_slime.png":
+{
+	"frame": {"x":256,"y":396,"w":512,"h":512},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":512,"h":512},
+	"sourceSize": {"w":512,"h":512}
+},
+"crystal.png":
+{
+	"frame": {"x":0,"y":0,"w":19,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":19,"h":32},
+	"sourceSize": {"w":19,"h":32}
+},
+"golem.png":
+{
+	"frame": {"x":0,"y":140,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
+},
+"green_slime.png":
+{
+	"frame": {"x":19,"y":0,"w":128,"h":128},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
+	"sourceSize": {"w":128,"h":128}
+},
+"player.png":
+{
+	"frame": {"x":256,"y":140,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
+},
+"player2.png":
+{
+	"frame": {"x":512,"y":140,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
+},
+"slime.png":
+{
+	"frame": {"x":0,"y":396,"w":256,"h":256},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":256},
+	"sourceSize": {"w":256,"h":256}
+},
+"sword.png":
+{
+	"frame": {"x":147,"y":0,"w":128,"h":128},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":128,"h":128},
+	"sourceSize": {"w":128,"h":128}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "chara.png",
+	"format": "RGBA8888",
+	"size": {"w":768,"h":908},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:6beefbce00a7bd5d91c5822e07efc700:6761e10c4f41942e8e2c2b8ae7195cb1:3649bcf221a27a1dfd6eb75f5c1a0141$"
+}
+}

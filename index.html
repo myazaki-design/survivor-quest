@@ -218,7 +218,7 @@ const CFG = {
   SPAWN_MARGIN: 80
 };
 
-// ========== SOUND SYSTEM (Web Audio API) ==========
+// ========== SOUND SYSTEM (Audio Pool + Web Audio API fallback) ==========
 let soundOn = true;
 const SE_LIST = [
   ['sword', 'assets/sword.mp3'],
@@ -229,60 +229,82 @@ const SE_LIST = [
   ['levelup', 'assets/levelup.wav']
 ];
 const seCooldowns = {};
+const SE_POOL_SIZE = { sword: 3, damage: 5, fire: 3, thunder: 2, click: 2, levelup: 1 };
+const sePools = {};
+const sePoolIdx = {};
+let useWebAudio = false;
 let audioCtx = null;
 const audioBuffers = {};
-const audioRawBuffers = {};
-let audioInitDone = false;
 
 function loadSounds(onProgress) {
-  return Promise.all(SE_LIST.map(([key, src]) =>
-    fetch(src)
-      .then(r => r.arrayBuffer())
-      .then(buf => { audioRawBuffers[key] = buf; })
-      .catch(() => { audioRawBuffers[key] = null; })
-      .finally(() => { if (onProgress) onProgress(); })
-  ));
+  return Promise.all(SE_LIST.map(([key, src]) => new Promise((resolve) => {
+    const poolSize = SE_POOL_SIZE[key] || 2;
+    sePools[key] = [];
+    sePoolIdx[key] = 0;
+    let loaded = 0;
+    for (let i = 0; i < poolSize; i++) {
+      const audio = new Audio(src);
+      audio.preload = 'auto';
+      audio.volume = 0.5;
+      sePools[key].push(audio);
+      const done = () => { loaded++; if (loaded >= poolSize) { if (onProgress) onProgress(); resolve(); } };
+      audio.addEventListener('canplaythrough', done, { once: true });
+      audio.addEventListener('error', done, { once: true });
+      audio.load();
+    }
+  })));
 }
 
-async function ensureAudioResumed() {
-  if (!audioCtx) {
+function tryInitWebAudio() {
+  if (audioCtx) return;
+  try {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (audioCtx.state === 'suspended') {
-    await audioCtx.resume();
-  }
-  if (!audioInitDone) {
-    audioInitDone = true;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
     const promises = [];
-    for (const [key] of SE_LIST) {
-      if (audioBuffers[key] || !audioRawBuffers[key]) continue;
-      const rawCopy = audioRawBuffers[key].slice(0);
+    for (const [key, src] of SE_LIST) {
       promises.push(
-        audioCtx.decodeAudioData(rawCopy)
-          .then(decoded => { audioBuffers[key] = decoded; })
+        fetch(src)
+          .then(r => r.arrayBuffer())
+          .then(buf => new Promise((resolve, reject) => {
+            audioCtx.decodeAudioData(buf, decoded => { audioBuffers[key] = decoded; resolve(); }, () => reject());
+          }))
           .catch(() => {})
       );
     }
-    await Promise.all(promises);
-  }
+    Promise.all(promises).then(() => {
+      let ok = 0;
+      for (const [key] of SE_LIST) { if (audioBuffers[key]) ok++; }
+      if (ok >= SE_LIST.length - 1) useWebAudio = true;
+    });
+  } catch (e) {}
 }
 
 function playSE(key, cooldown) {
-  if (!soundOn || !audioCtx || !audioBuffers[key]) return;
-  if (audioCtx.state === 'suspended') return;
+  if (!soundOn) return;
   const now = performance.now();
   if (cooldown) {
     if (seCooldowns[key] && now - seCooldowns[key] < cooldown) return;
     seCooldowns[key] = now;
   }
-  try {
-    const source = audioCtx.createBufferSource();
-    source.buffer = audioBuffers[key];
-    const gain = audioCtx.createGain();
-    gain.gain.value = 0.5;
-    source.connect(gain).connect(audioCtx.destination);
-    source.start(0);
-  } catch (e) {}
+  if (useWebAudio && audioCtx && audioBuffers[key]) {
+    try {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const source = audioCtx.createBufferSource();
+      source.buffer = audioBuffers[key];
+      const gain = audioCtx.createGain();
+      gain.gain.value = 0.5;
+      source.connect(gain).connect(audioCtx.destination);
+      source.start(0);
+      return;
+    } catch (e) {}
+  }
+  const pool = sePools[key];
+  if (!pool || pool.length === 0) return;
+  const a = pool[sePoolIdx[key] % pool.length];
+  sePoolIdx[key]++;
+  a.currentTime = 0;
+  a.volume = 0.5;
+  a.play().catch(() => {});
 }
 
 // ========== ASSET LOADER ==========
@@ -1164,10 +1186,10 @@ function setupInput() {
     }
   }
 
-  document.getElementById('start-btn').onclick = async () => { await ensureAudioResumed(); playSE('click'); startGame(); };
-  document.getElementById('retry-btn').onclick = async () => { await ensureAudioResumed(); playSE('click'); startGame(); };
-  document.getElementById('result-to-title-btn').onclick = async () => {
-    await ensureAudioResumed();
+  document.getElementById('start-btn').onclick = () => { tryInitWebAudio(); playSE('click'); startGame(); };
+  document.getElementById('retry-btn').onclick = () => { tryInitWebAudio(); playSE('click'); startGame(); };
+  document.getElementById('result-to-title-btn').onclick = () => {
+    tryInitWebAudio();
     playSE('click');
     document.getElementById('result-screen').style.display = 'none';
     document.getElementById('hud').style.display = 'none';
@@ -1183,8 +1205,8 @@ function setupInput() {
     state = 'title';
     showTitleScreen();
   };
-  document.getElementById('title-sound-btn').onclick = async () => {
-    await ensureAudioResumed();
+  document.getElementById('title-sound-btn').onclick = () => {
+    tryInitWebAudio();
     soundOn = !soundOn;
     document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
     document.getElementById('btn-sound').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';

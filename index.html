@@ -271,16 +271,43 @@ function tryUnlockAudio() {
   s.play().catch(() => {});
 }
 
+// ========== BGM ==========
+let BGM = null;
+function initBGM() {
+  BGM = new Audio('assets/bgm.mp3');
+  BGM.loop = true;
+  BGM.volume = 0.5;
+  BGM.preload = 'auto';
+}
+function playBGM() {
+  if (!BGM) return;
+  BGM.currentTime = 0;
+  BGM.play().catch(() => {});
+}
+function stopBGM() {
+  if (!BGM) return;
+  BGM.pause();
+  BGM.currentTime = 0;
+}
+function pauseBGM() {
+  if (BGM) BGM.pause();
+}
+function resumeBGM() {
+  if (BGM) BGM.play().catch(() => {});
+}
+
 // ========== ASSET LOADER ==========
 const IMG = {};
 const ASSET_LIST = [
   ['title_bg', 'assets/title_bg.jpg'],
   ['chara_atlas', 'assets/chara.png'],
   ['effect_atlas', 'assets/effect.png'],
+  ['player2_sheet', 'assets/player2_sheet.png'],
 ];
 
 let EFFECT_ATLAS_DATA = null;
 let CHARA_ATLAS_DATA = null;
+let PLAYER2_ATLAS_DATA = null;
 const CHARA_IMG_KEYS = { slime_blue: 'slime.png', slime_green: 'green_slime.png', bat: 'bat.png', golem: 'golem.png', boss: 'boss_slime.png' };
 
 function loadAssets(onProgress) {
@@ -296,7 +323,10 @@ function loadAssets(onProgress) {
   const charaJsonPromise = fetch('assets/chara.json').then(r => r.json()).then(data => {
     CHARA_ATLAS_DATA = data;
   }).catch(() => {});
-  return Promise.all([...imgPromises, effectJsonPromise, charaJsonPromise]);
+  const player2JsonPromise = fetch('assets/player2.json').then(r => r.json()).then(data => {
+    PLAYER2_ATLAS_DATA = data;
+  }).catch(() => {});
+  return Promise.all([...imgPromises, effectJsonPromise, charaJsonPromise, player2JsonPromise]);
 }
 
 // ========== UTILITIES ==========
@@ -1005,15 +1035,18 @@ function startGame() {
   introBounces = 0;
   introReady = false;
   state = 'intro';
+  playBGM();
 }
 
 function gameOver() {
   state = 'gameover';
+  stopBGM();
   showResult(false);
 }
 
 function gameClear() {
   state = 'clear';
+  stopBGM();
   showResult(true);
 }
 
@@ -1162,6 +1195,7 @@ function setupInput() {
   document.getElementById('retry-btn').onclick = () => { playSE('click'); startGame(); };
   document.getElementById('result-to-title-btn').onclick = () => {
     playSE('click');
+    stopBGM();
     document.getElementById('result-screen').style.display = 'none';
     document.getElementById('hud').style.display = 'none';
     document.getElementById('xp-bar-container').style.display = 'none';
@@ -1192,11 +1226,13 @@ function setupInput() {
   function openPause() {
     if (state !== 'playing' || paused) return;
     paused = true;
+    pauseBGM();
     pauseOverlay.style.display = 'flex';
     pauseBtn.textContent = '▶';
   }
-  function closePause() {
+  function closePause(skipResumeBGM) {
     paused = false;
+    if (!skipResumeBGM) resumeBGM();
     pauseOverlay.style.display = 'none';
     pauseBtn.textContent = '⏸';
     lastTime = performance.now();
@@ -1219,7 +1255,8 @@ function setupInput() {
 
   document.getElementById('btn-title').addEventListener('click', () => {
     playSE('click');
-    closePause();
+    stopBGM();
+    closePause(true);
     state = 'title';
     document.getElementById('hud').style.display = 'none';
     document.getElementById('xp-bar-container').style.display = 'none';
@@ -1335,9 +1372,22 @@ function drawPlayer() {
   if (player.invTimer > 0 && Math.floor(player.invTimer * 20) % 2 === 0) { ctx.globalAlpha = 0.4; }
 
   const usePlayer2 = player.facing.y >= 0;
-  const playerKey = usePlayer2 ? 'player2.png' : 'player.png';
-  const playerFrame = CHARA_ATLAS_DATA && CHARA_ATLAS_DATA.frames[playerKey];
-  const charaAtlas = IMG.chara_atlas;
+  const isMoving = Math.abs(input.dx) > 0.1 || Math.abs(input.dy) > 0.1;
+  let playerKey, atlasImg, playerFrame;
+  if (usePlayer2 && PLAYER2_ATLAS_DATA && IMG.player2_sheet) {
+    if (isMoving) {
+      const walkFrameIdx = Math.floor((performance.now() / 150) % 2);
+      playerKey = walkFrameIdx === 0 ? 'player2_1.png' : 'player2_2.png';
+    } else {
+      playerKey = 'player2_0.png';
+    }
+    playerFrame = PLAYER2_ATLAS_DATA.frames[playerKey];
+    atlasImg = IMG.player2_sheet;
+  } else {
+    playerKey = usePlayer2 ? 'player2.png' : 'player.png';
+    playerFrame = CHARA_ATLAS_DATA && CHARA_ATLAS_DATA.frames[playerKey];
+    atlasImg = IMG.chara_atlas;
+  }
   const flipX = player.facing.x < -0.1;
 
   const breathP = 1 + Math.sin(performance.now() * 0.004) * 0.02;
@@ -1346,9 +1396,9 @@ function drawPlayer() {
   ctx.translate(px, footY);
   ctx.scale(flipX ? -breathP : breathP, breathP);
   ctx.translate(-px, -footY);
-  if (charaAtlas && playerFrame) {
+  if (atlasImg && playerFrame) {
     const f = playerFrame.frame;
-    ctx.drawImage(charaAtlas, f.x, f.y, f.w, f.h, px - PW / 2, py - PH / 2, PW, PH);
+    ctx.drawImage(atlasImg, f.x, f.y, f.w, f.h, px - PW / 2, py - PH / 2, PW, PH);
   } else {
     ctx.fillStyle = '#4488ff';
     ctx.fillRect(px - PW / 4, py - PH / 4, PW / 2, PH / 2);
@@ -1952,6 +2002,8 @@ async function init() {
     loadAssets(onProgress),
     loadSounds(onProgress)
   ]);
+
+  initBGM();
 
   barInner.style.width = '100%';
   loadingText.textContent = 'Loading... 100%';

@@ -103,12 +103,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 #result-to-title-btn{margin-top:24px;padding:10px 36px;font-size:16px;font-weight:700;color:#fff;background:linear-gradient(135deg,#6c5b7b,#4a3f5c);border:none;border-radius:24px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:transform 0.15s;-webkit-tap-highlight-color:transparent}
 #result-to-title-btn:hover,#result-to-title-btn:active{transform:scale(1.04)}
 
-/* Debug: Max All Skills / Spawn All Enemies */
-#debug-max-btn{position:fixed;bottom:16px;right:16px;z-index:15;padding:8px 14px;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,0.6);border:2px solid rgba(255,200,0,0.6);border-radius:8px;cursor:pointer;display:none;pointer-events:auto;-webkit-tap-highlight-color:transparent}
-#debug-max-btn:hover,#debug-max-btn:active{background:rgba(255,200,0,0.25);border-color:#ffcc00}
-#debug-spawn-btn{position:fixed;bottom:16px;right:120px;z-index:15;padding:8px 14px;font-size:11px;font-weight:700;color:#fff;background:rgba(0,0,0,0.6);border:2px solid rgba(100,200,255,0.6);border-radius:8px;cursor:pointer;display:none;pointer-events:auto;-webkit-tap-highlight-color:transparent}
-#debug-spawn-btn:hover,#debug-spawn-btn:active{background:rgba(100,200,255,0.25);border-color:#64c8ff}
-
 /* Loading Screen */
 #loading-screen{position:fixed;inset:0;z-index:300;background:#1a0f2e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity 0.5s ease-out}
 #loading-screen.done{opacity:0;pointer-events:none}
@@ -168,10 +162,6 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 
 <!-- Weapon Slots -->
 <div id="weapon-slots"></div>
-
-<!-- Debug: Max All Skills / Spawn All Enemies -->
-<button id="debug-max-btn">全スキルMAX</button>
-<button id="debug-spawn-btn">敵全種出現</button>
 
 <!-- Joystick Zone -->
 <div id="joystick-zone">
@@ -1019,29 +1009,6 @@ function applyPassives() {
   player.pickupRange = 60 * (1 + (player.passives.magnet || 0) * 0.2);
 }
 
-function debugSpawnAllEnemies() {
-  for (const type of Object.keys(ENEMY_DEFS)) {
-    spawnEnemy(type);
-  }
-}
-
-function debugMaxAllSkills() {
-  for (const wd of WEAPON_DEFS) {
-    const owned = player.weapons.find(w => w.id === wd.id);
-    if (owned) {
-      owned.level = wd.maxLv;
-    } else if (player.weapons.length < 6) {
-      const w = createWeapon(wd.id);
-      w.level = wd.maxLv;
-      player.weapons.push(w);
-    }
-  }
-  for (const pd of PASSIVE_DEFS) {
-    player.passives[pd.id] = pd.maxLv;
-  }
-  applyPassives();
-}
-
 // ========== GAME FLOW ==========
 function startGame() {
   document.getElementById('title-screen').style.display = 'none';
@@ -1054,8 +1021,6 @@ function startGame() {
   document.getElementById('pause-overlay').style.display = 'none';
   document.getElementById('hp-bar-container').style.display = 'flex';
   document.getElementById('hp-low-overlay').style.display = 'none';
-  document.getElementById('debug-max-btn').style.display = 'block';
-  document.getElementById('debug-spawn-btn').style.display = 'block';
 
   gameTime = 0; kills = 0; totalXP = 0; levelupPending = false;
   shakeTimer = 0; spawnTimer = 0; bossSpawned = {}; bossRespawnTimer = 0; bossHpMultiplier = 1; statMul = 1; damageShakeTimer = 0;
@@ -1102,8 +1067,6 @@ function showResult(cleared) {
   document.getElementById('hp-bar-container').style.display = 'none';
   document.getElementById('weapon-slots').style.display = 'none';
   document.getElementById('pause-btn').style.display = 'none';
-  document.getElementById('debug-max-btn').style.display = 'none';
-  document.getElementById('debug-spawn-btn').style.display = 'none';
   document.getElementById('hp-low-overlay').style.display = 'none';
   document.getElementById('pause-overlay').style.display = 'none';
   paused = false;
@@ -1249,8 +1212,6 @@ function setupInput() {
     document.getElementById('hp-bar-container').style.display = 'none';
     document.getElementById('weapon-slots').style.display = 'none';
     document.getElementById('pause-btn').style.display = 'none';
-    document.getElementById('debug-max-btn').style.display = 'none';
-    document.getElementById('debug-spawn-btn').style.display = 'none';
     document.getElementById('hp-low-overlay').style.display = 'none';
     document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
     state = 'title';
@@ -1262,11 +1223,6 @@ function setupInput() {
     document.getElementById('btn-sound').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
     playSE('click');
   };
-  document.getElementById('debug-max-btn').addEventListener('click', () => { playSE('click'); debugMaxAllSkills(); });
-  document.getElementById('debug-max-btn').addEventListener('touchend', (e) => { e.preventDefault(); playSE('click'); debugMaxAllSkills(); });
-  document.getElementById('debug-spawn-btn').addEventListener('click', () => { playSE('click'); debugSpawnAllEnemies(); });
-  document.getElementById('debug-spawn-btn').addEventListener('touchend', (e) => { e.preventDefault(); playSE('click'); debugSpawnAllEnemies(); });
-
   const pauseBtn = document.getElementById('pause-btn');
   const pauseOverlay = document.getElementById('pause-overlay');
   function openPause() {
@@ -1310,8 +1266,6 @@ function setupInput() {
     document.getElementById('hp-bar-container').style.display = 'none';
     document.getElementById('weapon-slots').style.display = 'none';
     document.getElementById('pause-btn').style.display = 'none';
-  document.getElementById('debug-max-btn').style.display = 'none';
-  document.getElementById('debug-spawn-btn').style.display = 'none';
   document.getElementById('hp-low-overlay').style.display = 'none';
   document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
   showTitleScreen();

@@ -7,8 +7,9 @@
 <link href="https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'RocknRoll One',sans-serif}
-html,body{width:100%;height:100%;overflow:hidden;background:#111;touch-action:none;user-select:none;-webkit-user-select:none;font-family:'RocknRoll One',sans-serif}
-canvas{display:block;width:100%;height:100%}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none;user-select:none;-webkit-user-select:none;font-family:'RocknRoll One',sans-serif;display:flex;justify-content:center;align-items:center}
+#game-container{position:relative;width:100%;max-width:600px;height:100vh;max-height:100vh;background:#111;transform:translateZ(0);overflow:hidden}
+#game-container canvas{display:block;width:100%;height:100%}
 
 /* Joystick */
 #joystick-zone{position:fixed;top:0;left:0;width:100%;height:100%;z-index:5;display:none}
@@ -117,7 +118,7 @@ canvas{display:block;width:100%;height:100%}
 </style>
 </head>
 <body>
-
+<div id="game-container">
 <canvas id="gameCanvas"></canvas>
 
 <!-- Loading Screen -->
@@ -199,6 +200,7 @@ canvas{display:block;width:100%;height:100%}
 <div id="title-screen">
   <button id="start-btn">&#x2694;&#xFE0F; スタート &#x2694;&#xFE0F;</button>
   <button id="title-sound-btn">🔊 サウンド: ON</button>
+</div>
 </div>
 
 <script>
@@ -328,8 +330,9 @@ const ctx = canvas.getContext('2d', { alpha: false, willReadFrequently: false })
 let canvasW, canvasH, gameScale, gameOffX, gameOffY;
 
 function resize() {
-  canvasW = window.innerWidth;
-  canvasH = window.innerHeight;
+  const container = document.getElementById('game-container');
+  canvasW = container ? container.clientWidth : window.innerWidth;
+  canvasH = container ? container.clientHeight : window.innerHeight;
   canvas.width = canvasW;
   canvas.height = canvasH;
   gameScale = Math.max(canvasW / CFG.VIEW_W, canvasH / CFG.VIEW_H);

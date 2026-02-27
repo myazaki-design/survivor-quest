@@ -269,7 +269,7 @@ function initBGM() {
   BGM.preload = 'auto';
 }
 function playBGM() {
-  if (!BGM) return;
+  if (!BGM || !soundOn) return;
   BGM.currentTime = 0;
   BGM.play().catch(() => {});
 }
@@ -282,13 +282,15 @@ function pauseBGM() {
   if (BGM) BGM.pause();
 }
 function resumeBGM() {
-  if (BGM) BGM.play().catch(() => {});
+  if (!BGM || !soundOn) return;
+  BGM.play().catch(() => {});
 }
 
 // ========== ASSET LOADER ==========
 const IMG = {};
 const ASSET_LIST = [
   ['title_bg', 'assets/title_bg.jpg'],
+  ['map_bg', 'assets/map_bg_01.png'],
   ['chara_atlas', 'assets/chara.png'],
   ['effect_atlas', 'assets/effect.png'],
   ['player2_sheet', 'assets/player2_sheet.png'],
@@ -1342,24 +1344,20 @@ function render() {
 }
 
 function drawMap() {
-  ctx.fillStyle = '#9e8b6f';
-  ctx.fillRect(camera.x, camera.y, CFG.VIEW_W + 100, CFG.VIEW_H + 100);
-
-  ctx.strokeStyle = 'rgba(0,0,0,0.06)';
-  ctx.lineWidth = 1;
-  const tileSize = 100;
-  const startX = Math.floor(camera.x / tileSize) * tileSize;
-  const startY = Math.floor(camera.y / tileSize) * tileSize;
-  for (let x = startX; x < camera.x + CFG.VIEW_W + tileSize; x += tileSize) {
-    ctx.beginPath(); ctx.moveTo(x, camera.y); ctx.lineTo(x, camera.y + CFG.VIEW_H); ctx.stroke();
+  const img = IMG.map_bg;
+  if (img && img.complete && img.naturalWidth > 0) {
+    const tileSize = 256;
+    const startX = Math.floor(camera.x / tileSize) * tileSize;
+    const startY = Math.floor(camera.y / tileSize) * tileSize;
+    for (let y = startY; y < camera.y + CFG.VIEW_H + tileSize; y += tileSize) {
+      for (let x = startX; x < camera.x + CFG.VIEW_W + tileSize; x += tileSize) {
+        ctx.drawImage(img, x, y, tileSize, tileSize);
+      }
+    }
+  } else {
+    ctx.fillStyle = '#9e8b6f';
+    ctx.fillRect(camera.x, camera.y, CFG.VIEW_W + 100, CFG.VIEW_H + 100);
   }
-  for (let y = startY; y < camera.y + CFG.VIEW_H + tileSize; y += tileSize) {
-    ctx.beginPath(); ctx.moveTo(camera.x, y); ctx.lineTo(camera.x + CFG.VIEW_W, y); ctx.stroke();
-  }
-
-  ctx.strokeStyle = 'rgba(120,80,40,0.5)';
-  ctx.lineWidth = 3;
-  ctx.strokeRect(0, 0, CFG.MAP_W, CFG.MAP_H);
 }
 
 function drawPlayer() {
@@ -1801,12 +1799,12 @@ function drawMinimapScreen() {
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.arc(mmCX, mmCY, mmR, 0, Math.PI * 2);
   ctx.stroke();
   ctx.strokeStyle = 'rgba(0,0,0,0.6)';
-  ctx.lineWidth = 3;
+  ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.arc(mmCX, mmCY, mmR + 2, 0, Math.PI * 2);
   ctx.stroke();

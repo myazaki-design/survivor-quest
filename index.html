@@ -2030,6 +2030,16 @@ async function init() {
 
   initBGM();
 
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      pauseBGM();
+    } else {
+      if ((state === 'playing' || state === 'levelup') && !paused && soundOn) {
+        resumeBGM();
+      }
+    }
+  });
+
   barInner.style.width = '100%';
   loadingText.textContent = 'Loading... 100%';
 

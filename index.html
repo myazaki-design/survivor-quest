@@ -291,6 +291,8 @@ const IMG = {};
 const ASSET_LIST = [
   ['title_bg', 'assets/title_bg.jpg'],
   ['map_bg', 'assets/map_bg_01.png'],
+  ['map_bg2', 'assets/map_bg_02.png'],
+  ['map_bg3', 'assets/map_bg_03.png'],
   ['chara_atlas', 'assets/chara.png'],
   ['effect_atlas', 'assets/effect.png'],
   ['player2_sheet', 'assets/player2_sheet.png'],
@@ -1344,13 +1346,19 @@ function render() {
 }
 
 function drawMap() {
-  const img = IMG.map_bg;
-  if (img && img.complete && img.naturalWidth > 0) {
+  const imgs = [IMG.map_bg, IMG.map_bg2, IMG.map_bg3];
+  const img1 = imgs[0];
+  if (img1 && img1.complete && img1.naturalWidth > 0) {
     const tileSize = 256;
     const startX = Math.floor(camera.x / tileSize) * tileSize;
     const startY = Math.floor(camera.y / tileSize) * tileSize;
     for (let y = startY; y < camera.y + CFG.VIEW_H + tileSize; y += tileSize) {
       for (let x = startX; x < camera.x + CFG.VIEW_W + tileSize; x += tileSize) {
+        const tileX = Math.floor(x / tileSize);
+        const tileY = Math.floor(y / tileSize);
+        const h = ((tileX * 73856093) ^ (tileY * 19349663)) >>> 0;
+        const idx = h % 3;
+        const img = imgs[idx] && imgs[idx].complete && imgs[idx].naturalWidth > 0 ? imgs[idx] : img1;
         ctx.drawImage(img, x, y, tileSize, tileSize);
       }
     }

@@ -26,6 +26,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 #total-xp-display{font-size:16px;font-weight:900;color:#ffcc00;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000;letter-spacing:1px;padding:4px 20px}
 #pause-btn{position:fixed;top:10px;right:12px;z-index:20;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#6c6c6c,#4a4a4a);border:none;box-shadow:0 4px 16px rgba(0,0,0,0.4);color:#fff;font-size:22px;display:none;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform 0.15s}
 #pause-btn:hover,#pause-btn:active{transform:scale(1.06);box-shadow:0 6px 20px rgba(0,0,0,0.5)}
+#debug-death-btn{position:fixed;bottom:80px;left:12px;z-index:20;width:44px;height:44px;border-radius:50%;background:rgba(100,60,60,0.7);border:1px solid rgba(255,100,100,0.5);color:#ff8888;font-size:14px;display:none;align-items:center;justify-content:center;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform 0.15s}
+#debug-death-btn:hover,#debug-death-btn:active{transform:scale(1.08);background:rgba(120,70,70,0.9)}
 #pause-overlay{position:fixed;inset:0;z-index:90;display:none;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;flex-direction:column}
 #pause-dialog{background:linear-gradient(180deg,#1a0f2e 0%,#2d1b4e 50%,#1a0f2e 100%);border:2px solid #5a4a7a;outline:1px solid #000;border-radius:20px;padding:32px 40px;min-width:300px;display:flex;flex-direction:column;align-items:center;gap:16px;pointer-events:auto;box-shadow:0 8px 40px rgba(0,0,0,0.6)}
 #pause-dialog h3{color:#ffcc00;font-size:24px;font-weight:900;margin:0 0 4px 0;letter-spacing:2px;text-shadow:0 0 20px rgba(255,204,0,0.4),-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000}
@@ -134,6 +136,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:no
 
 <!-- Pause Button -->
 <div id="pause-btn">⏸</div>
+<!-- Debug: 死亡演出テスト -->
+<div id="debug-death-btn" title="死亡演出テスト">💀</div>
 
 <!-- Pause Overlay -->
 <div id="pause-overlay">
@@ -218,7 +222,8 @@ const SE_LIST = [
   ['fire', 'assets/fire.mp3'],
   ['thunder', 'assets/thunder.mp3'],
   ['click', 'assets/click.mp3'],
-  ['levelup', 'assets/levelup.wav']
+  ['levelup', 'assets/levelup.wav'],
+  ['dead', 'assets/dead.mp3']
 ];
 const seCooldowns = {};
 
@@ -296,6 +301,7 @@ const ASSET_LIST = [
   ['chara_atlas', 'assets/chara.png'],
   ['effect_atlas', 'assets/effect.png'],
   ['player2_sheet', 'assets/player2_sheet.png'],
+  ['player_dead', 'assets/player_dead.png'],
 ];
 
 let EFFECT_ATLAS_DATA = null;
@@ -395,6 +401,11 @@ let levelupPending = false;
 let shakeTimer = 0;
 let shakeIntensity = 0;
 let damageShakeTimer = 0;
+let deathTimer = 0;
+let deathPhase = 0;
+let soulY = 0;
+let soulAlpha = 0;
+let playerFallAngle = 0;
 
 const camera = { x: 0, y: 0 };
 const input = { dx: 0, dy: 0 };
@@ -1024,6 +1035,7 @@ function startGame() {
   document.getElementById('xp-bar-container').style.display = 'flex';
   document.getElementById('joystick-zone').style.display = 'block';
   document.getElementById('pause-btn').style.display = 'flex';
+  document.getElementById('debug-death-btn').style.display = 'flex';
   paused = false;
   document.getElementById('pause-overlay').style.display = 'none';
   document.getElementById('hp-bar-container').style.display = 'flex';
@@ -1031,6 +1043,7 @@ function startGame() {
 
   gameTime = 0; kills = 0; totalXP = 0; levelupPending = false;
   shakeTimer = 0; spawnTimer = 0; bossSpawned = {}; bossRespawnTimer = 0; bossHpMultiplier = 1; statMul = 1; damageShakeTimer = 0;
+  deathTimer = 0; deathPhase = 0; soulY = 0; soulAlpha = 0; playerFallAngle = 0;
   enemies = []; xpGems = []; projectiles = []; effects = []; damageNums = [];
 
   player.x = CFG.MAP_W / 2; player.y = CFG.MAP_H / 2;
@@ -1056,9 +1069,78 @@ function startGame() {
 }
 
 function gameOver() {
-  state = 'gameover';
+  state = 'dying';
   stopBGM();
-  showResult(false);
+  playSE('dead');
+  shakeTimer = 0;
+  shakeIntensity = 0;
+  deathTimer = 0;
+  deathPhase = 0;
+  soulY = 0;
+  soulAlpha = 0;
+  playerFallAngle = 0;
+}
+
+function updateDying(dt) {
+  deathTimer += dt;
+
+  if (deathPhase === 0) {
+    playerFallAngle = Math.min(Math.PI / 2, playerFallAngle + dt * 3.0);
+    if (deathTimer > 0.6) {
+      deathPhase = 1;
+      deathTimer = 0;
+    }
+  } else if (deathPhase === 1) {
+    const SOUL_RISE_DURATION = 1.67;
+    const progress = Math.min(1, deathTimer / SOUL_RISE_DURATION);
+    const easeInQuart = t => t * t * t * t;
+    soulY = 200 * easeInQuart(progress);
+    const fadeInAlpha = Math.min(1, deathTimer / 0.15);
+    soulAlpha = fadeInAlpha < 1 ? fadeInAlpha : soulY < 100 ? 1 : (200 - soulY) / 100;
+    if (progress >= 1) {
+      state = 'gameover';
+      showResult(false);
+    }
+  }
+
+  updateCamera();
+}
+
+function drawDyingPlayer() {
+  const px = player.x, py = player.y;
+
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.beginPath();
+  ctx.ellipse(px, py + PH * 0.35 + 5, PW * 0.25, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  const playerKey = 'player1_2.png';
+  const atlasImg = IMG.player2_sheet;
+  const playerFrame = PLAYER2_ATLAS_DATA && PLAYER2_ATLAS_DATA.frames[playerKey];
+  const footY = py + PH / 2;
+  ctx.translate(px, footY);
+  ctx.rotate(playerFallAngle);
+  ctx.translate(-px, -footY);
+  if (atlasImg && playerFrame) {
+    const f = playerFrame.frame;
+    ctx.drawImage(atlasImg, f.x, f.y, f.w, f.h, px - PW / 2, py - PH / 2, PW, PH);
+  }
+  ctx.restore();
+
+  if (deathPhase >= 1 && IMG.player_dead) {
+    ctx.save();
+    ctx.globalAlpha = soulAlpha;
+    const soulW = PW;
+    const soulH = PH;
+    const fallenCenterX = px + (PH / 2) * Math.sin(playerFallAngle);
+    const fallenCenterY = py + (PH / 2) * (1 - Math.cos(playerFallAngle));
+    const soulDrawY = fallenCenterY - (soulY + 50);
+    ctx.drawImage(IMG.player_dead, fallenCenterX - soulW / 2, soulDrawY - soulH / 2, soulW, soulH);
+    ctx.restore();
+  }
 }
 
 function gameClear() {
@@ -1074,6 +1156,7 @@ function showResult(cleared) {
   document.getElementById('hp-bar-container').style.display = 'none';
   document.getElementById('weapon-slots').style.display = 'none';
   document.getElementById('pause-btn').style.display = 'none';
+  document.getElementById('debug-death-btn').style.display = 'none';
   document.getElementById('hp-low-overlay').style.display = 'none';
   document.getElementById('pause-overlay').style.display = 'none';
   paused = false;
@@ -1219,6 +1302,7 @@ function setupInput() {
     document.getElementById('hp-bar-container').style.display = 'none';
     document.getElementById('weapon-slots').style.display = 'none';
     document.getElementById('pause-btn').style.display = 'none';
+    document.getElementById('debug-death-btn').style.display = 'none';
     document.getElementById('hp-low-overlay').style.display = 'none';
     document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
     state = 'title';
@@ -1250,6 +1334,10 @@ function setupInput() {
   pauseBtn.addEventListener('click', () => { playSE('click'); if (paused) closePause(); else openPause(); });
   pauseBtn.addEventListener('touchend', (e) => { e.preventDefault(); playSE('click'); if (paused) closePause(); else openPause(); });
 
+  const debugDeathBtn = document.getElementById('debug-death-btn');
+  debugDeathBtn.addEventListener('click', () => { if (state === 'playing' || state === 'intro') gameOver(); });
+  debugDeathBtn.addEventListener('touchend', (e) => { e.preventDefault(); if (state === 'playing' || state === 'intro') gameOver(); });
+
   document.getElementById('btn-resume').addEventListener('click', () => { playSE('click'); closePause(); });
   document.getElementById('btn-resume').addEventListener('touchend', (e) => { e.preventDefault(); playSE('click'); closePause(); });
 
@@ -1273,6 +1361,7 @@ function setupInput() {
     document.getElementById('hp-bar-container').style.display = 'none';
     document.getElementById('weapon-slots').style.display = 'none';
     document.getElementById('pause-btn').style.display = 'none';
+    document.getElementById('debug-death-btn').style.display = 'none';
   document.getElementById('hp-low-overlay').style.display = 'none';
   document.getElementById('title-sound-btn').textContent = soundOn ? '🔊 サウンド: ON' : '🔇 サウンド: OFF';
   showTitleScreen();
@@ -1307,8 +1396,13 @@ function updatePlayer(dt) {
 
 // ========== CAMERA ==========
 function updateCamera() {
-  camera.x = player.x - CFG.VIEW_W / 2;
-  camera.y = player.y - CFG.VIEW_H / 2;
+  let cx = player.x, cy = player.y;
+  if (state === 'dying') {
+    const offsetX = (60 * S) / 2 * Math.sin(playerFallAngle);
+    cx += offsetX;
+  }
+  camera.x = cx - CFG.VIEW_W / 2;
+  camera.y = cy - CFG.VIEW_H / 2;
   camera.x = clamp(camera.x, 0, CFG.MAP_W - CFG.VIEW_W);
   camera.y = clamp(camera.y, 0, CFG.MAP_H - CFG.VIEW_H);
 }
@@ -1373,6 +1467,7 @@ function drawMap() {
 
 function drawPlayer() {
   if (state === 'intro') { drawIntroPlayer(); return; }
+  if (state === 'dying') { drawDyingPlayer(); return; }
 
   const px = player.x, py = player.y;
 
@@ -1962,6 +2057,12 @@ function gameLoop(timestamp) {
 
   if (state === 'intro') {
     updateIntro(dt);
+    render();
+    return;
+  }
+
+  if (state === 'dying') {
+    updateDying(dt);
     render();
     return;
   }

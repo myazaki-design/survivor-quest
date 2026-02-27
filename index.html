@@ -1410,6 +1410,14 @@ function updateCamera() {
 // ========== RENDERING ==========
 const PW = 60 * S, PH = 60 * S;
 
+function drawDeathOverlay() {
+  ctx.save();
+  ctx.globalAlpha = 0.5;
+  ctx.fillStyle = '#000';
+  ctx.fillRect(camera.x, camera.y, CFG.VIEW_W, CFG.VIEW_H);
+  ctx.restore();
+}
+
 function render() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = '#111';
@@ -1430,12 +1438,16 @@ function render() {
   drawEnemies();
   const swordBehind = player.facing.y < -0.1;
   if (swordBehind) drawEffectsFront();
-  drawPlayer();
+  if (state !== 'dying') drawPlayer();
   if (!swordBehind) drawEffectsFront();
   drawBoss();
   drawProjectiles();
   drawLightning();
   drawDamageNums();
+  if (state === 'dying') {
+    drawDeathOverlay();
+    drawPlayer();
+  }
 
   ctx.setTransform(gameScale, 0, 0, gameScale, gameOffX, gameOffY);
   drawHUDCanvas();

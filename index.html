@@ -1162,7 +1162,7 @@ function showResult(cleared) {
   const displayTime = Math.min(Math.floor(gameTime), 99 * 60 + 99);
   const min = Math.floor(displayTime / 60);
   const sec = displayTime % 60;
-  const score = kills * 10 + displayTime * 5 + player.level * 100 + (cleared ? 5000 : 0);
+  const score = Math.min(99999, kills * 10 + displayTime * 5 + (player.level - 1) * 100 + (cleared ? 5000 : 0));
   document.getElementById('result-stats').innerHTML =
     `生存時間: <span>${min}分${sec.toString().padStart(2, '0')}秒</span><br>` +
     `キル数: <span>${kills}</span><br>` +
@@ -1929,7 +1929,7 @@ function updateHUD(dt) {
   document.getElementById('timer-display').textContent = `${min}:${sec.toString().padStart(2, '0')}`;
   document.getElementById('timer-display').style.color = '#fff';
   document.getElementById('kills-display').textContent = kills;
-  const liveScore = kills * 10 + Math.floor(gameTime) * 5 + player.level * 100;
+  const liveScore = Math.min(99999, kills * 10 + Math.floor(gameTime) * 5 + (player.level - 1) * 100);
   document.getElementById('total-xp-display').textContent = `スコア ${liveScore.toLocaleString()}`;
   document.getElementById('xp-lv-label').textContent = `Lv.${player.level}`;
   document.getElementById('hp-text').textContent = `${Math.ceil(player.hp)}/${player.maxHp}`;
